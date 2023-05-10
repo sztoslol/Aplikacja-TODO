@@ -32,9 +32,13 @@ const SingIn = () => {
         }));
     };
 
-    const handleButoonClick = () => {
+    const handleButtonClick = () => {
         /*Dodac sprawdzanie danych*/
         navigate("/");
+    };
+
+    const handleRegisterLinkClick = () => {
+        navigate("/register");
     };
 
     return (
@@ -50,7 +54,7 @@ const SingIn = () => {
                     <div className='login-input-top'>
                         <div className='login-input-top-text'>Login</div>
                         <div className='login-input-top-dot'>
-                            <div className='dot'></div>
+                            <div className='dot' id='dot-login-login'></div>
                         </div>
                     </div>
                     <input
@@ -66,7 +70,7 @@ const SingIn = () => {
                     <div className='login-input-top'>
                         <div className='login-input-top-text'>Hasło</div>
                         <div className='login-input-top-dot'>
-                            <div className='dot'></div>
+                            <div className='dot' id='dot-login-password'></div>
                         </div>
                     </div>
                     <input
@@ -95,7 +99,7 @@ const SingIn = () => {
                 <button
                     type='button'
                     id='login-button-main'
-                    onClick={handleButoonClick}
+                    onClick={handleButtonClick}
                 >
                     Zaloguj się
                 </button>
@@ -108,7 +112,12 @@ const SingIn = () => {
 
                 <div id='register-section'>
                     <div id='register-section-text'>Nie masz konta? </div>
-                    <div id='register-section-link'>Zarejestruj się</div>
+                    <div
+                        id='register-section-link'
+                        onClick={handleRegisterLinkClick}
+                    >
+                        Zarejestruj się
+                    </div>
                 </div>
             </div>
         </>
