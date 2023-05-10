@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import "./register.css";
 
@@ -12,6 +12,22 @@ const Register = () => {
     const navigate = useNavigate();
 
     console.log(userData);
+
+    useEffect(() => {
+        fetch("http://localhost:3010/users")
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error("Network response was not ok.");
+            })
+            .then((data) => {
+                console.log(data);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, []);
 
     const handleLoginInputChange = (event) => {
         setUserData((prevState) => ({

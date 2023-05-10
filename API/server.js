@@ -9,6 +9,15 @@ const connection = mysql.createConnection({
     database: "todoapp",
 });
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    next();
+});
+
 connection.connect((err) => {
     if (err) {
         console.error("Error connecting to database:", err);
