@@ -2,12 +2,10 @@ const express = require("express");
 const mysql = require("mysql2");
 const app = express();
 
-const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "todoapp",
-});
+const bodyParser = require("body-parser");
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -16,6 +14,13 @@ app.use(function (req, res, next) {
         "Origin, X-Requested-With, Content-Type, Accept"
     );
     next();
+});
+
+const connection = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "todoapp",
 });
 
 connection.connect((err) => {
@@ -35,6 +40,45 @@ app.get("/users", (req, res) => {
             res.json(results);
         }
     });
+});
+
+app.get("/users/:login", (req, res) => {
+    const login = req.params.login;
+
+    connection.query(
+        "SELECT login FROM użytkownicy WHERE login = ?",
+        [login],
+        (err, results) => {
+            if (err) {
+                console.error("Error querying database:", err);
+                res.status(500).send("Error querying database");
+            } else {
+                console.log(results);
+                if (results.length === 0) {
+                    res.json({ exists: false });
+                } else {
+                    res.json({ exists: true });
+                }
+            }
+        }
+    );
+});
+
+app.post("/users", (req, res) => {
+    const { login, password } = req.body;
+    connection.query(
+        "INSERT INTO użytkownicy (login, hasło) VALUES (?, ?)",
+        [login, password],
+        (err, results) => {
+            if (err) {
+                console.error("Error querying database:", err);
+                res.status(500).send("Error querying database");
+            } else {
+                console.log(`New user added with ID: ${results.insertId}`);
+                res.status(200).send("User added successfully");
+            }
+        }
+    );
 });
 
 app.listen(3010, () => {
