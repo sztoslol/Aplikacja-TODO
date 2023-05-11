@@ -12,7 +12,7 @@ import "animate.css";
         - zrobić dymek `onHover` przy labelu hasła z informacjami co hasło powinno zawierać 
 */
 
-const Register = () => {
+const Register = ({ handleLogin }) => {
     const dotLogin = useRef(null);
     const dotPassword = useRef(null);
     const dotConfirmPassword = useRef(null);
@@ -39,10 +39,6 @@ const Register = () => {
                 console.log(error);
             });
     }, []);
-
-    const userCookie = Cookies.get("user");
-    const userObject = JSON.parse(userCookie);
-    console.log(userObject);
 
     const handleLoginInputChange = (event) => {
         setUserData((prevState) => ({
@@ -133,6 +129,7 @@ const Register = () => {
                 if (response && response.ok) {
                     console.log("User added successfully");
                     navigate("/");
+                    handleLogin();
                 } else {
                     throw new Error("Error adding user to database");
                 }

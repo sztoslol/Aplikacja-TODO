@@ -46,10 +46,10 @@ app.get("/users/:login", (req, res) => {
     const login = req.params.login;
 
     connection.query(
-        "SELECT login FROM użytkownicy WHERE login = ?",
+        "SELECT * FROM użytkownicy WHERE login = ?",
         [login],
         (err, results) => {
-            if (err) {
+         if (err) {
                 console.error("Error querying database:", err);
                 res.status(500).send("Error querying database");
             } else {
@@ -57,7 +57,8 @@ app.get("/users/:login", (req, res) => {
                 if (results.length === 0) {
                     res.json({ exists: false });
                 } else {
-                    res.json({ exists: true });
+                    const user = results[0];
+                    res.json({ exists: true, user });
                 }
             }
         }

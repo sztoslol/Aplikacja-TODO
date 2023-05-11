@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
 import bcrypt from "bcryptjs";
 import "./singin.css";
 import "animate.css";
 
-const SingIn = () => {
-    const [user, setUserData] = useState({
+const SingIn = ({ handleLogin }) => {
+    const [userData, setUserData] = useState({
         login: "",
         password: "",
         rememberMe: false,
@@ -38,9 +37,36 @@ const SingIn = () => {
         navigate("/register");
     };
 
-    const handleButtonClick = () => {
-        /*Dodac sprawdzanie danych*/
-        navigate("/");
+    /*TODO: Dokończyć*/
+    const handleUserDataCheck = (data) => {
+        if (userData.login !== data.login) console.log("Błędny login");
+
+        bcrypt.compare(userData.password, data.hasło).then((match) => {
+            if (match) {
+                navigate("/");
+            } else {
+                console.log("Hasła się rożnią");
+            }
+        });
+
+        handleLogin();
+    };
+
+    const handleLogIn = () => {
+        if (!userData.login || !userData.password) return; // TODO: obsługa pustych pól formularza
+
+        fetch(`http://localhost:3010/users/${userData.login}`)
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.exists) {
+                    handleUserDataCheck(data.user);
+                } else {
+                    console.log("Użytkownik nie istnieje");
+                }
+            })
+            .catch((error) => {
+                console.error("Błąd pobierania danych użytkownika:", error);
+            });
     };
 
     return (
@@ -63,7 +89,7 @@ const SingIn = () => {
                         type='text'
                         className='login-input-login'
                         placeholder='Wprowadź login'
-                        value={user.login}
+                        value={userData.login}
                         onChange={handleLoginInputChange}
                     />
                 </div>
@@ -79,7 +105,7 @@ const SingIn = () => {
                         type='password'
                         className='login-input-login'
                         placeholder='Wprowadź hasło'
-                        value={user.password}
+                        value={userData.password}
                         onChange={handlePasswordInputChange}
                     />
                 </div>
@@ -101,7 +127,7 @@ const SingIn = () => {
                 <button
                     type='button'
                     id='login-button-main'
-                    onClick={handleButtonClick}
+                    onClick={handleLogIn}
                 >
                     Zaloguj się
                 </button>
