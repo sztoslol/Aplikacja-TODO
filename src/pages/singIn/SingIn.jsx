@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import bcrypt from "bcryptjs";
 import "./singin.css";
+import "animate.css";
 
 const SingIn = () => {
     const [user, setUserData] = useState({
@@ -9,7 +12,6 @@ const SingIn = () => {
         rememberMe: false,
     });
     const navigate = useNavigate();
-    console.log(user);
 
     const handleLoginInputChange = (event) => {
         setUserData((prevState) => ({
@@ -32,13 +34,13 @@ const SingIn = () => {
         }));
     };
 
+    const handleRegisterLinkClick = () => {
+        navigate("/register");
+    };
+
     const handleButtonClick = () => {
         /*Dodac sprawdzanie danych*/
         navigate("/");
-    };
-
-    const handleRegisterLinkClick = () => {
-        navigate("/register");
     };
 
     return (

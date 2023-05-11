@@ -5,6 +5,13 @@ import bcrypt from "bcryptjs";
 import "./register.css";
 import "animate.css";
 
+/*
+    Do zrobienia:
+        - dokończyć walidacje formularza
+        - dokończyć cookies (szyfrowanie danych)
+        - zrobić dymek `onHover` przy labelu hasła z informacjami co hasło powinno zawierać 
+*/
+
 const Register = () => {
     const dotLogin = useRef(null);
     const dotPassword = useRef(null);
@@ -28,13 +35,14 @@ const Register = () => {
                 }
                 throw new Error("Network response was not ok.");
             })
-            .then((data) => {
-                console.log(data);
-            })
             .catch((error) => {
                 console.log(error);
             });
     }, []);
+
+    const userCookie = Cookies.get("user");
+    const userObject = JSON.parse(userCookie);
+    console.log(userObject);
 
     const handleLoginInputChange = (event) => {
         setUserData((prevState) => ({
@@ -93,7 +101,11 @@ const Register = () => {
             dotConfirmPassword.current.style.display = "block";
         }
 
-        if (!regex.test(userData.password)) return;
+        if (!regex.test(userData.password)) {
+            dotPassword.current.style.display = "block";
+            dotConfirmPassword.current.style.display = "block";
+            return;
+        }
 
         const hashedPassword = bcrypt.hashSync(userData.password, 10);
 
@@ -131,6 +143,16 @@ const Register = () => {
 
         if (userData.rememberMe) {
             Cookies.set("isLoggedIn", true, { expires: 7 });
+
+            Cookies.set(
+                "user",
+                JSON.stringify({
+                    login: userData.login,
+                    password: bcrypt.hashSync(userData.password, 10),
+                    type: "user",
+                }),
+                { expires: 7 }
+            );
         }
     };
 
@@ -225,7 +247,7 @@ const Register = () => {
                     id='register-button-main'
                     onClick={handleAddUser}
                 >
-                    Zaloguj się
+                    Zarejstruj się
                 </button>
 
                 <div id='register-separator'>
