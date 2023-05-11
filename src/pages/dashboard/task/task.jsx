@@ -1,7 +1,6 @@
 import "./task.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBookmark as bookmarkNotFilled } from "@fortawesome/free-regular-svg-icons";
-import { faBookmark as bookmarkFilled } from "@fortawesome/free-solid-svg-icons";
+import { faBookmark } from "@fortawesome/free-solid-svg-icons";
 
 const Task = ({ header, desc, dueDate }) => {
     return (
@@ -26,11 +25,10 @@ const Task = ({ header, desc, dueDate }) => {
 
                 <div className='task-bottom-footer'>
                     <FontAwesomeIcon
-                        icon={bookmarkFilled}
+                        icon={faBookmark}
                         style={{
                             fontSize: "150%",
                             color: "#233140",
-                            cursor: "pointer",
                         }}
                     />
                     <div className='task-bottom-footer-text'>{dueDate}</div>
