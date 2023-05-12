@@ -51,14 +51,14 @@ const Dashboard = () => {
                             name='radio-filter'
                             value='done'
                         />
-                        <label htmlFor='saved'>Wykonane</label>
+                        <label htmlFor='done'>Wykonane</label>
                         <input
                             type='radio'
                             id='incoming'
                             name='radio-filter'
                             value='incoming'
                         />
-                        <label htmlFor='saved'>Nadchodzące</label>
+                        <label htmlFor='incoming'>Nadchodzące</label>
                     </div>
                 </div>
                 <div className='dashboard-content'>

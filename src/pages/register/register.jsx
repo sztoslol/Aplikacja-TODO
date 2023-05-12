@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+import { getIsLoggedIn } from "../main/App";
 import Cookies from "js-cookie";
 import bcrypt from "bcryptjs";
 import "./register.css";
@@ -12,7 +13,7 @@ import "animate.css";
         - zrobić dymek `onHover` przy labelu hasła z informacjami co hasło powinno zawierać 
 */
 
-const Register = ({ handleLogin }) => {
+const Register = ({ onLogin }) => {
     const dotLogin = useRef(null);
     const dotPassword = useRef(null);
     const dotConfirmPassword = useRef(null);
@@ -26,6 +27,10 @@ const Register = ({ handleLogin }) => {
     const navigate = useNavigate();
     const regex =
         /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
+
+    useEffect(() => {
+        getIsLoggedIn() && navigate("/");
+    }, []);
 
     useEffect(() => {
         fetch("http://localhost:3010/users")
@@ -81,6 +86,7 @@ const Register = ({ handleLogin }) => {
         ) {
             if (!userData.login) {
                 dotLogin.current.style.display = "block";
+                return;
             } else dotLogin.current.style.display = "none";
 
             if (!userData.password) {
@@ -95,6 +101,10 @@ const Register = ({ handleLogin }) => {
         if (userData.confirmPassword !== userData.password) {
             dotPassword.current.style.display = "block";
             dotConfirmPassword.current.style.display = "block";
+            return;
+        } else {
+            dotConfirmPassword.current.style.display = "none";
+            dotPassword.current.style.display = "none";
         }
 
         if (!regex.test(userData.password)) {
@@ -128,8 +138,7 @@ const Register = ({ handleLogin }) => {
             .then((response) => {
                 if (response && response.ok) {
                     console.log("User added successfully");
-                    navigate("/");
-                    handleLogin();
+                    onLogin();
                 } else {
                     throw new Error("Error adding user to database");
                 }

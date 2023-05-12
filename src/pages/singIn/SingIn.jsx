@@ -1,16 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getIsLoggedIn } from "../main/App";
+import Cookies from "js-cookie";
 import bcrypt from "bcryptjs";
 import "./singin.css";
 import "animate.css";
 
-const SingIn = ({ handleLogin }) => {
+const SingIn = ({ onLogin }) => {
     const [userData, setUserData] = useState({
         login: "",
         password: "",
-        rememberMe: false,
+        rememberMe: true,
     });
     const navigate = useNavigate();
+
+    useEffect(() => {
+        getIsLoggedIn() && navigate("/");
+    }, []);
 
     const handleLoginInputChange = (event) => {
         setUserData((prevState) => ({
@@ -42,14 +48,23 @@ const SingIn = ({ handleLogin }) => {
         if (userData.login !== data.login) console.log("Błędny login");
 
         bcrypt.compare(userData.password, data.hasło).then((match) => {
-            if (match) {
-                navigate("/");
-            } else {
-                console.log("Hasła się rożnią");
-            }
+            if (!match) console.log("Błąd podczas sprawdzania danych");
         });
 
-        handleLogin();
+        if (userData.rememberMe) {
+            Cookies.set("isLoggedIn", true, { expires: 7 });
+            Cookies.set(
+                "user",
+                JSON.stringify({
+                    login: userData.login,
+                    password: bcrypt.hashSync(userData.password, 10),
+                    type: data.typ_uzytkownika,
+                }),
+                { expires: 7 }
+            );
+        }
+
+        onLogin();
     };
 
     const handleLogIn = () => {

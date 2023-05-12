@@ -1,6 +1,6 @@
 .note-main {
-    width: 640px;
-    height: 150px;
+    width: 100%;
+    height: fit-content;
     display: flex;
     flex-direction: column;
     background-color: #00000015;

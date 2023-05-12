@@ -1,5 +1,5 @@
 import "./App.css";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Dashboard from "../dashboard/dashboard.jsx";
 import SingIn from "../singIn/singin";
@@ -9,11 +9,14 @@ import Cookies from "js-cookie";
 
 const App = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(
-        Cookies.get("user") ? Cookies.get("isLoggedIn") : false
+        Cookies.get("isLoggedIn") === "true" ? true : false
     );
+
+    const navigate = useNavigate();
 
     const handleLogin = () => {
         setIsLoggedIn(true);
+        navigate("/");
     };
 
     return (
@@ -30,4 +33,7 @@ const App = () => {
     );
 };
 
+export const getIsLoggedIn = () => {
+    return Cookies.get("isLoggedIn") === "true";
+};
 export default App;
