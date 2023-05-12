@@ -18,6 +18,10 @@ const Register = ({ onLogin }) => {
     const dotPassword = useRef(null);
     const dotConfirmPassword = useRef(null);
 
+    const errorLogin = useRef(null);
+    const errorPassword = useRef(null);
+    const errorConfirmPassword = useRef(null);
+
     const [userData, setUserData] = useState({
         login: "",
         password: "",
@@ -78,7 +82,6 @@ const Register = ({ onLogin }) => {
     };
 
     const handleAddUser = () => {
-        /*Dodac obsługe błędów, czyli pojawianie kropek w błędnym polu*/
         if (
             !userData.login ||
             !userData.password ||
@@ -86,40 +89,65 @@ const Register = ({ onLogin }) => {
         ) {
             if (!userData.login) {
                 dotLogin.current.style.display = "block";
-                return;
-            } else dotLogin.current.style.display = "none";
+                errorLogin.current.style.display = "block";
+                errorLogin.current.textContent = "Uzupełnij to pole!";
+            } else {
+                dotLogin.current.style.display = "none";
+                errorLogin.current.style.display = "none";
+            }
 
             if (!userData.password) {
                 dotPassword.current.style.display = "block";
-            } else dotPassword.current.style.display = "none";
+                errorPassword.current.style.display = "block";
+                errorPassword.current.textContent = "Uzupełnij to pole!";
+            } else {
+                dotPassword.current.style.display = "none";
+                errorPassword.current.style.display = "none";
+            }
 
             if (!userData.confirmPassword) {
                 dotConfirmPassword.current.style.display = "block";
-            } else dotConfirmPassword.current.style.display = "none";
+                errorConfirmPassword.current.style.display = "block";
+                errorConfirmPassword.current.textContent = "Uzupełnij to pole!";
+            } else {
+                dotConfirmPassword.current.style.display = "none";
+                errorConfirmPassword.current.style.display = "none";
+            }
+            return;
         }
 
         if (userData.confirmPassword !== userData.password) {
             dotPassword.current.style.display = "block";
             dotConfirmPassword.current.style.display = "block";
+            errorPassword.current.textContent = "Hasła nie mogą się rożnić!";
+
+            errorConfirmPassword.current.style.display = "none";
             return;
         } else {
-            dotConfirmPassword.current.style.display = "none";
             dotPassword.current.style.display = "none";
         }
 
         if (!regex.test(userData.password)) {
             dotPassword.current.style.display = "block";
             dotConfirmPassword.current.style.display = "block";
+            errorPassword.current.style.display = "block";
+            errorPassword.current.textContent = "Nieprawidłowe hasło";
             return;
+        } else {
+            dotPassword.current.style.display = "none";
+            dotConfirmPassword.current.style.display = "none";
+            errorPassword.current.style.display = "none";
         }
 
         const hashedPassword = bcrypt.hashSync(userData.password, 10);
 
-        // Sprawdzenie, czy użytkownik o podanym loginie już istnieje
+        /* Sprawdzenie, czy użytkownik o podanym loginie już istnieje
         fetch(`http://localhost:3010/users/${userData.login}`)
             .then((response) => response.json())
             .then((data) => {
                 if (data.exists) {
+                    errorLogin.current.textContent =
+                        "Użytkownik z podanym login już istnieje";
                     console.log("User with this login already exists");
                     return;
                 }
@@ -138,6 +166,24 @@ const Register = ({ onLogin }) => {
             .then((response) => {
                 if (response && response.ok) {
                     console.log("User added successfully");
+
+                    if (userData.rememberMe) {
+                        Cookies.set("isLoggedIn", true, { expires: 7 });
+
+                        Cookies.set(
+                            "user",
+                            JSON.stringify({
+                                login: userData.login,
+                                password: bcrypt.hashSync(
+                                    userData.password,
+                                    10
+                                ),
+                                type: "user",
+                            }),
+                            { expires: 7 }
+                        );
+                    }
+
                     onLogin();
                 } else {
                     throw new Error("Error adding user to database");
@@ -145,21 +191,7 @@ const Register = ({ onLogin }) => {
             })
             .catch((error) => {
                 console.error("Error:", error);
-            });
-
-        if (userData.rememberMe) {
-            Cookies.set("isLoggedIn", true, { expires: 7 });
-
-            Cookies.set(
-                "user",
-                JSON.stringify({
-                    login: userData.login,
-                    password: bcrypt.hashSync(userData.password, 10),
-                    type: "user",
-                }),
-                { expires: 7 }
-            );
-        }
+            });*/
     };
 
     return (
@@ -175,7 +207,14 @@ const Register = ({ onLogin }) => {
                 <div className='register-input'>
                     <div className='register-input-top'>
                         <div className='register-input-top-text'>Login</div>
-                        <div className='register-input-top-dot'>
+                        <div className='login-input-top-dot'>
+                            <div
+                                className='form-error-text'
+                                id='error-register-login'
+                                ref={errorLogin}
+                            >
+                                Błąd
+                            </div>
                             <div
                                 className='dot animate__animated animate__heartBeat'
                                 id='dot-register-login'
@@ -195,7 +234,14 @@ const Register = ({ onLogin }) => {
                 <div className='register-input'>
                     <div className='register-input-top'>
                         <div className='register-input-top-text'>Hasło</div>
-                        <div className='register-input-top-dot'>
+                        <div className='login-input-top-dot'>
+                            <div
+                                className='form-error-text'
+                                id='error-register-password'
+                                ref={errorPassword}
+                            >
+                                Błąd
+                            </div>
                             <div
                                 className='dot animate__animated animate__heartBeat'
                                 id='dot-register-password'
@@ -217,7 +263,14 @@ const Register = ({ onLogin }) => {
                         <div className='register-input-top-text'>
                             Powtórz hasło
                         </div>
-                        <div className='register-input-top-dot'>
+                        <div className='login-input-top-dot'>
+                            <div
+                                className='form-error-text'
+                                id='error-register-confirmPassword'
+                                ref={errorConfirmPassword}
+                            >
+                                Błąd
+                            </div>
                             <div
                                 className='dot animate__animated animate__heartBeat'
                                 id='dot-register-confirmPassword'
