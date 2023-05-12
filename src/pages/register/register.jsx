@@ -116,6 +116,15 @@ const Register = ({ onLogin }) => {
             return;
         }
 
+        if (userData.login.length <= 3) {
+            dotLogin.current.style.display = "block";
+            errorLogin.current.style.display = "block";
+            errorLogin.current.textContent = "Login jest za krótki!";
+        } else {
+            errorLogin.current.style.display = "none";
+            dotLogin.current.style.display = "none";
+        }
+
         if (userData.confirmPassword !== userData.password) {
             dotPassword.current.style.display = "block";
             dotConfirmPassword.current.style.display = "block";
@@ -213,7 +222,7 @@ const Register = ({ onLogin }) => {
                                 id='error-register-login'
                                 ref={errorLogin}
                             >
-                                Błąd
+                                Debug
                             </div>
                             <div
                                 className='dot animate__animated animate__heartBeat'
@@ -240,7 +249,7 @@ const Register = ({ onLogin }) => {
                                 id='error-register-password'
                                 ref={errorPassword}
                             >
-                                Błąd
+                                Debug
                             </div>
                             <div
                                 className='dot animate__animated animate__heartBeat'
@@ -269,7 +278,7 @@ const Register = ({ onLogin }) => {
                                 id='error-register-confirmPassword'
                                 ref={errorConfirmPassword}
                             >
-                                Błąd
+                                Debug
                             </div>
                             <div
                                 className='dot animate__animated animate__heartBeat'

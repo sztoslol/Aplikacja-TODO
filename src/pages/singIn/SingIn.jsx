@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getIsLoggedIn } from "../main/App";
 import Cookies from "js-cookie";
@@ -7,6 +7,12 @@ import "./singin.css";
 import "animate.css";
 
 const SingIn = ({ onLogin }) => {
+    const dotLogin = useRef(null);
+    const dotPassword = useRef(null);
+
+    const errorLogin = useRef(null);
+    const errorPassword = useRef(null);
+
     const [userData, setUserData] = useState({
         login: "",
         password: "",
@@ -43,32 +49,64 @@ const SingIn = ({ onLogin }) => {
         navigate("/register");
     };
 
-    /*TODO: Dokończyć*/
     const handleUserDataCheck = (data) => {
-        if (userData.login !== data.login) console.log("Błędny login");
+        if (userData.login !== data.login) {
+            dotLogin.current.style.display = "block";
+            errorLogin.current.style.display = "block";
+            errorLogin.current.textContent = "Błędny login lub hasło";
+        } else {
+            dotLogin.current.style.display = "none";
+            errorLogin.current.style.display = "none";
 
-        bcrypt.compare(userData.password, data.hasło).then((match) => {
-            if (!match) console.log("Błąd podczas sprawdzania danych");
-        });
+            bcrypt.compare(userData.password, data.hasło).then((match) => {
+                if (!match) {
+                    dotLogin.current.style.display = "block";
+                    errorLogin.current.style.display = "block";
+                    errorLogin.current.textContent = "Błędny login lub hasło";
+                } else {
+                    dotLogin.current.style.display = "none";
+                    errorLogin.current.style.display = "none";
 
-        if (userData.rememberMe) {
-            Cookies.set("isLoggedIn", true, { expires: 7 });
-            Cookies.set(
-                "user",
-                JSON.stringify({
-                    login: userData.login,
-                    password: bcrypt.hashSync(userData.password, 10),
-                    type: data.typ_uzytkownika,
-                }),
-                { expires: 7 }
-            );
+                    if (userData.rememberMe) {
+                        Cookies.set("isLoggedIn", true, { expires: 7 });
+                        Cookies.set(
+                            "user",
+                            JSON.stringify({
+                                login: userData.login,
+                                password: bcrypt.hashSync(
+                                    userData.password,
+                                    10
+                                ),
+                                type: data.typ_uzytkownika,
+                            }),
+                            { expires: 7 }
+                        );
+                    }
+
+                    onLogin();
+                }
+            });
         }
-
-        onLogin();
     };
 
     const handleLogIn = () => {
-        if (!userData.login || !userData.password) return; // TODO: obsługa pustych pól formularza
+        if (!userData.login) {
+            dotLogin.current.style.display = "block";
+            errorLogin.current.style.display = "block";
+            errorLogin.current.textContent = "Uzupełnij to pole!";
+        } else {
+            dotLogin.current.style.display = "none";
+            errorLogin.current.style.display = "none";
+        }
+
+        if (!userData.password) {
+            dotPassword.current.style.display = "block";
+            errorPassword.current.style.display = "block";
+            errorPassword.current.textContent = "Uzupełnij to pole!";
+        } else {
+            dotPassword.current.style.display = "none";
+            errorPassword.current.style.display = "none";
+        }
 
         fetch(`http://localhost:3010/users/${userData.login}`)
             .then((response) => response.json())
@@ -97,7 +135,18 @@ const SingIn = ({ onLogin }) => {
                     <div className='login-input-top'>
                         <div className='login-input-top-text'>Login</div>
                         <div className='login-input-top-dot'>
-                            <div className='dot' id='dot-login-login'></div>
+                            <div
+                                className='form-error-text'
+                                id='error-signin-confirmPassword'
+                                ref={errorLogin}
+                            >
+                                Debug
+                            </div>
+                            <div
+                                className='dot'
+                                id='dot-login-login'
+                                ref={dotLogin}
+                            ></div>
                         </div>
                     </div>
                     <input
@@ -113,7 +162,18 @@ const SingIn = ({ onLogin }) => {
                     <div className='login-input-top'>
                         <div className='login-input-top-text'>Hasło</div>
                         <div className='login-input-top-dot'>
-                            <div className='dot' id='dot-login-password'></div>
+                            <div
+                                className='form-error-text'
+                                id='error-signin-confirmPassword'
+                                ref={errorPassword}
+                            >
+                                Debug
+                            </div>
+                            <div
+                                className='dot'
+                                id='dot-login-password'
+                                ref={dotPassword}
+                            ></div>
                         </div>
                     </div>
                     <input

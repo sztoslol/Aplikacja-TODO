@@ -8,14 +8,21 @@ import ProtectedRoutes from "../../ProtectedRoutes";
 import Cookies from "js-cookie";
 
 const App = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(
-        Cookies.get("isLoggedIn") === "true" ? true : false
-    );
-
     const navigate = useNavigate();
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        if (Cookies.get("isLoggedIn") === "true") return true;
+        else if (sessionStorage.getItem("isLoggedIn") == "true") return true;
+        else return false;
+    });
 
     const handleLogin = () => {
-        setIsLoggedIn(true);
+        sessionStorage.setItem("isLoggedIn", "true");
+        setIsLoggedIn(() => {
+            if (Cookies.get("isLoggedIn") === "true") return true;
+            else if (sessionStorage.getItem("isLoggedIn") == "true")
+                return true;
+            else return false;
+        });
         navigate("/");
     };
 
@@ -34,6 +41,10 @@ const App = () => {
 };
 
 export const getIsLoggedIn = () => {
-    return Cookies.get("isLoggedIn") === "true";
+    return () => {
+        if (Cookies.get("isLoggedIn") === "true") return true;
+        else if (sessionStorage.getItem("isLoggedIn") == "true") return true;
+        else return false;
+    };
 };
 export default App;
