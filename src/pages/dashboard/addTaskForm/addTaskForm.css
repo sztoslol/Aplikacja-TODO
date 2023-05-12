@@ -1,0 +1,189 @@
+.taskForm-main {
+    width: 450px;
+    height: fit-content;
+    border-radius: 6px;
+    background-color: #fff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-box-shadow: 6px 11px 45px -17px rgba(66, 68, 90, 1);
+    -moz-box-shadow: 6px 11px 45px -17px rgba(66, 68, 90, 1);
+    box-shadow: 6px 11px 45px -17px rgba(66, 68, 90, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.taskForm-header {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 47px;
+    color: #233140;
+    text-align: center;
+    margin-top: 25px;
+}
+
+.taskForm-subheader {
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 25px;
+    color: rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin-top: 10px;
+}
+
+.taskForm-input-taskname {
+    margin-top: 30px;
+}
+
+.taskForm-input-taskname-text,
+.taskForm-input-desc {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #233140;
+}
+
+.taskForm-taskname,
+.taskForm-desc {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 6px;
+    width: 364px;
+    height: 64px;
+    border: none;
+    box-sizing: border-box;
+    padding-left: 17px;
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: rgba(0, 0, 0, 0.4);
+    margin-top: 3px;
+}
+
+.taskForm-taskname,
+.taskForm-desc {
+    outline: none;
+}
+
+.taskForm-desc {
+    resize: none;
+    padding: 15px;
+    height: 213px;
+}
+
+.taskForm-input-desc {
+    margin-top: 20px;
+}
+
+.taskForm-dropdown {
+    width: 364px;
+    height: fit-content;
+    margin-top: 10px;
+}
+
+.taskForm-dropdown-header {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #233140;
+}
+
+.taskForm-dropdown-main {
+    width: 364px;
+    height: 64px;
+    background-color: #0000000a;
+    border-radius: 6px;
+    margin-top: 6px;
+    box-sizing: border-box;
+    padding-left: 17px;
+    display: flex;
+    align-items: center;
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #233140;
+    display: flex;
+    justify-content: space-between;
+}
+
+.taskForm-dropdown-main:hover {
+    cursor: pointer;
+}
+
+.taskForm-dropdown-users {
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #233140;
+    margin-top: 3px;
+    width: 364px;
+    height: fit-content;
+    max-height: 180px;
+    background-color: #0000000a;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px;
+    border-radius: 6px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.taskForm-dropdown-main-icon {
+    justify-self: flex-end;
+    margin-right: 25px;
+}
+
+.taskForm-dropdown-element {
+    padding: 3px 5px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.dropdown-icon {
+    align-self: center;
+}
+
+.taskForm-dropdown-element:hover {
+    cursor: pointer;
+    background-color: #00000012;
+}
+
+.taskForm-button {
+    width: 364px;
+    height: 64px;
+    background: #47bdff;
+    border-radius: 6px;
+    border: none;
+    margin: 30px 0;
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #ffffff;
+}
+
+.taskForm-button:hover {
+    cursor: pointer;
+}
+
+.taskForm-button:focus {
+    outline: none;
+}

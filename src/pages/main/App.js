@@ -28,10 +28,17 @@ const App = () => {
 
     return (
         <Routes>
-            <Route path='/login' element={<SingIn onLogin={handleLogin} />} />
+            <Route
+                path='/login'
+                element={
+                    <SingIn onLogin={handleLogin} isLoggedIn={isLoggedIn} />
+                }
+            />
             <Route
                 path='/register'
-                element={<Register onLogin={handleLogin} />}
+                element={
+                    <Register onLogin={handleLogin} isLoggedIn={isLoggedIn} />
+                }
             />
             <Route element={<ProtectedRoutes isLoggedIn={isLoggedIn} />}>
                 <Route path='/' element={<Dashboard />} />
@@ -40,11 +47,4 @@ const App = () => {
     );
 };
 
-export const getIsLoggedIn = () => {
-    return () => {
-        if (Cookies.get("isLoggedIn") === "true") return true;
-        else if (sessionStorage.getItem("isLoggedIn") == "true") return true;
-        else return false;
-    };
-};
 export default App;

@@ -36,6 +36,7 @@
     padding-top: 25px;
     box-sizing: border-box;
     border-radius: 6px;
+    background-color: #0000000a;
 }
 
 .task-bottom-description {

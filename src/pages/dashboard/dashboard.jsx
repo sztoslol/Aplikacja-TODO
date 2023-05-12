@@ -1,12 +1,9 @@
 import "./dashboard.css";
 import Task from "./task/task";
 import Note from "./note/note";
+import AddTaskForm from "./addTaskForm/addTaskForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faPlus,
-    faListCheck,
-    faAnglesRight,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const Dashboard = () => {
     const demoData = {
@@ -17,6 +14,7 @@ const Dashboard = () => {
 
     return (
         <>
+            <AddTaskForm />
             <div className='dashboard-topbar'></div>
             <div className='dashboard-main'>
                 <div className='dashboard-left'>
@@ -44,7 +42,7 @@ const Dashboard = () => {
                             name='radio-filter'
                             value='saved'
                         />
-                        <label htmlFor='saved'>Nadchodzące</label>
+                        <label htmlFor='saved'>Zapisane</label>
                         <input
                             type='radio'
                             id='done'

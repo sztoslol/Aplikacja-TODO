@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getIsLoggedIn } from "../main/App";
 import Cookies from "js-cookie";
 import bcrypt from "bcryptjs";
 import "./singin.css";
 import "animate.css";
 
-const SingIn = ({ onLogin }) => {
+const SingIn = ({ onLogin, isLoggedIn }) => {
     const dotLogin = useRef(null);
     const dotPassword = useRef(null);
 
@@ -21,7 +20,7 @@ const SingIn = ({ onLogin }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        getIsLoggedIn() && navigate("/");
+        isLoggedIn === true && navigate("/");
     }, []);
 
     const handleLoginInputChange = (event) => {
@@ -113,8 +112,15 @@ const SingIn = ({ onLogin }) => {
             .then((data) => {
                 if (data.exists) {
                     handleUserDataCheck(data.user);
-                } else {
+                }
+                if (!data.exists) {
                     console.log("Użytkownik nie istnieje");
+                    dotLogin.current.style.display = "block";
+                    errorLogin.current.style.display = "block";
+                    errorLogin.current.textContent = "Błędny login lub hasło";
+                } else {
+                    dotLogin.current.style.display = "none";
+                    errorLogin.current.style.display = "none";
                 }
             })
             .catch((error) => {

@@ -1,19 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import { getIsLoggedIn } from "../main/App";
 import Cookies from "js-cookie";
 import bcrypt from "bcryptjs";
 import "./register.css";
 import "animate.css";
 
-/*
-    Do zrobienia:
-        - dokończyć walidacje formularza
-        - dokończyć cookies (szyfrowanie danych)
-        - zrobić dymek `onHover` przy labelu hasła z informacjami co hasło powinno zawierać 
-*/
-
-const Register = ({ onLogin }) => {
+const Register = ({ onLogin, isLoggedIn }) => {
     const dotLogin = useRef(null);
     const dotPassword = useRef(null);
     const dotConfirmPassword = useRef(null);
@@ -33,20 +25,7 @@ const Register = ({ onLogin }) => {
         /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
 
     useEffect(() => {
-        getIsLoggedIn() && navigate("/");
-    }, []);
-
-    useEffect(() => {
-        fetch("http://localhost:3010/users")
-            .then((response) => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error("Network response was not ok.");
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+        isLoggedIn === true && navigate("/");
     }, []);
 
     const handleLoginInputChange = (event) => {
@@ -120,6 +99,7 @@ const Register = ({ onLogin }) => {
             dotLogin.current.style.display = "block";
             errorLogin.current.style.display = "block";
             errorLogin.current.textContent = "Login jest za krótki!";
+            return;
         } else {
             errorLogin.current.style.display = "none";
             dotLogin.current.style.display = "none";
@@ -129,7 +109,6 @@ const Register = ({ onLogin }) => {
             dotPassword.current.style.display = "block";
             dotConfirmPassword.current.style.display = "block";
             errorPassword.current.textContent = "Hasła nie mogą się rożnić!";
-
             errorConfirmPassword.current.style.display = "none";
             return;
         } else {
@@ -148,15 +127,14 @@ const Register = ({ onLogin }) => {
             errorPassword.current.style.display = "none";
         }
 
-        const hashedPassword = bcrypt.hashSync(userData.password, 10);
-
-        /* Sprawdzenie, czy użytkownik o podanym loginie już istnieje
+        // Sprawdzenie, czy użytkownik o podanym loginie już istnieje
         fetch(`http://localhost:3010/users/${userData.login}`)
             .then((response) => response.json())
             .then((data) => {
                 if (data.exists) {
                     errorLogin.current.textContent =
                         "Użytkownik z podanym login już istnieje";
+                    errorLogin.current.display = "block";
                     console.log("User with this login already exists");
                     return;
                 }
@@ -168,7 +146,7 @@ const Register = ({ onLogin }) => {
                     },
                     body: JSON.stringify({
                         login: userData.login,
-                        password: hashedPassword,
+                        password: bcrypt.hashSync(userData.password, 10),
                     }),
                 });
             })
@@ -200,7 +178,7 @@ const Register = ({ onLogin }) => {
             })
             .catch((error) => {
                 console.error("Error:", error);
-            });*/
+            });
     };
 
     return (
