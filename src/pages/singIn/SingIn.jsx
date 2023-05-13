@@ -57,7 +57,7 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
             dotLogin.current.style.display = "none";
             errorLogin.current.style.display = "none";
 
-            bcrypt.compare(userData.password, data.hasło).then((match) => {
+            bcrypt.compare(userData.password, data.password).then((match) => {
                 if (!match) {
                     dotLogin.current.style.display = "block";
                     errorLogin.current.style.display = "block";

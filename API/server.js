@@ -32,7 +32,7 @@ connection.connect((err) => {
 });
 
 app.get("/users", (req, res) => {
-    connection.query("SELECT * FROM użytkownicy", (err, results) => {
+    connection.query("SELECT * FROM users", (err, results) => {
         if (err) {
             console.error("Error querying database:", err);
             res.status(500).send("Error querying database");
@@ -46,10 +46,10 @@ app.get("/users/:login", (req, res) => {
     const login = req.params.login;
 
     connection.query(
-        "SELECT * FROM użytkownicy WHERE login = ?",
+        "SELECT * FROM users WHERE login = ?",
         [login],
         (err, results) => {
-         if (err) {
+            if (err) {
                 console.error("Error querying database:", err);
                 res.status(500).send("Error querying database");
             } else {
@@ -68,7 +68,7 @@ app.get("/users/:login", (req, res) => {
 app.post("/users", (req, res) => {
     const { login, password } = req.body;
     connection.query(
-        "INSERT INTO użytkownicy (login, hasło) VALUES (?, ?)",
+        "INSERT INTO users (login, password) VALUES (?, ?)",
         [login, password],
         (err, results) => {
             if (err) {
@@ -77,6 +77,23 @@ app.post("/users", (req, res) => {
             } else {
                 console.log(`New user added with ID: ${results.insertId}`);
                 res.status(200).send("User added successfully");
+            }
+        }
+    );
+});
+
+app.post("/notes", (req, res) => {
+    const { name, description } = req.body;
+    connection.query(
+        "INSERT INTO notes (name, description) VALUES (?, ?)",
+        [name, description],
+        (err, results) => {
+            if (err) {
+                console.error("Error querying database:", err);
+                res.status(500).send("Error querying database");
+            } else {
+                console.log(`New note added with ID: ${results.insertId}`);
+                res.status(200).send("Note added successfully");
             }
         }
     );

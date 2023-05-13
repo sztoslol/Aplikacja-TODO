@@ -108,6 +108,7 @@ const Register = ({ onLogin, isLoggedIn }) => {
         if (userData.confirmPassword !== userData.password) {
             dotPassword.current.style.display = "block";
             dotConfirmPassword.current.style.display = "block";
+            errorPassword.current.style.display = "block";
             errorPassword.current.textContent = "Hasła nie mogą się rożnić!";
             errorConfirmPassword.current.style.display = "none";
             return;
@@ -125,6 +126,7 @@ const Register = ({ onLogin, isLoggedIn }) => {
             dotPassword.current.style.display = "none";
             dotConfirmPassword.current.style.display = "none";
             errorPassword.current.style.display = "none";
+            errorConfirmPassword.current.display = "none";
         }
 
         // Sprawdzenie, czy użytkownik o podanym loginie już istnieje
@@ -133,8 +135,9 @@ const Register = ({ onLogin, isLoggedIn }) => {
             .then((data) => {
                 if (data.exists) {
                     errorLogin.current.textContent =
-                        "Użytkownik z podanym login już istnieje";
-                    errorLogin.current.display = "block";
+                        "Login zajęty";
+                    errorLogin.current.style.display = "block";
+                    dotLogin.current.style.display = "block";
                     console.log("User with this login already exists");
                     return;
                 }

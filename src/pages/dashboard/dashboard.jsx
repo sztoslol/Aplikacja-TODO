@@ -2,19 +2,55 @@ import "./dashboard.css";
 import Task from "./task/task";
 import Note from "./note/note";
 import AddTaskForm from "./addTaskForm/addTaskForm";
+import AddNoteForm from "./addNoteForm/addNoteForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { useState, useEffect } from "react";
 
 const Dashboard = () => {
+    const [showAddNoteForm, setShowAddNoteForm] = useState(true);
+    const [showAddTaskForm, setShowAddTaskForm] = useState(false);
+
     const demoData = {
         name: "Zadanie z matematyki",
         description: "Rozwiąż zadania z funkcji kwadratowej",
         expiration_date: "2023-05-31",
     };
 
+    const handleAddTaskFormChange = () => {
+        setShowAddTaskForm((prev) => {
+            return !prev;
+        });
+    };
+    const handleAddNoteFormChange = () => {
+        setShowAddNoteForm((prev) => {
+            return !prev;
+        });
+    };
+
+    const handleEscKey = (event) => {
+        if (event.keyCode === 27) {
+            if (showAddTaskForm === true) handleAddTaskFormChange();
+            else if (showAddNoteForm === true) handleAddNoteFormChange();
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener("keydown", handleEscKey);
+
+        return () => {
+            document.removeEventListener("keydown", handleEscKey);
+        };
+    }, [showAddNoteForm, showAddNoteForm]);
+
+    const handleAddNote = (name, description) => {};
+
     return (
         <>
-            <AddTaskForm />
+            {showAddTaskForm && <AddTaskForm />}
+            {showAddNoteForm && (
+                <AddNoteForm handleAddNote={handleAddNote} />
+            )}
             <div className='dashboard-topbar'></div>
             <div className='dashboard-main'>
                 <div className='dashboard-left'>
