@@ -102,6 +102,7 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
             dotPassword.current.style.display = "block";
             errorPassword.current.style.display = "block";
             errorPassword.current.textContent = "Uzupełnij to pole!";
+            return;
         } else {
             dotPassword.current.style.display = "none";
             errorPassword.current.style.display = "none";

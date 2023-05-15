@@ -10,6 +10,21 @@ import { Waveform } from "@uiball/loaders";
 
 /*
     Obłsuga formularzy(w tym dodanie danych do bazy) znajduje się w ich komponentach
+    
+    TODO: 
+        -> Pliki cookies => token + baza danych
+        -> Naprawa formularzy 
+        -> Dodanie edycji zadań
+        -> Naprawa błędnego przypisywania dat z formularza zadań :zbadać: -> 
+            => ?serwer? 
+            => ?przetwarzanie strona klienta?
+        -> Wstępne testy formularzy ->
+            => Logowanie
+            => Rejstracja
+            => Dodawanie zadań
+            => Dodawanie notatek
+        
+        -= Nie uwzględniono dashboard -> dokończyć =-
 */
 
 const Dashboard = () => {
