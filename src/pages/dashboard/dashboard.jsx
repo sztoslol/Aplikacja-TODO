@@ -6,10 +6,23 @@ import AddNoteForm from "./addNoteForm/addNoteForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect } from "react";
+import { Waveform } from "@uiball/loaders";
+
+/*
+    Obłsuga formularzy(w tym dodanie danych do bazy) znajduje się w ich komponentach
+*/
 
 const Dashboard = () => {
-    const [showAddNoteForm, setShowAddNoteForm] = useState(true);
+    const [showAddNoteForm, setShowAddNoteForm] = useState(false);
     const [showAddTaskForm, setShowAddTaskForm] = useState(false);
+    const [notes, setNotes] = useState([]);
+
+    useEffect(() => {
+        fetch("http://localhost:3010/notes")
+            .then((response) => response.json())
+            .then((data) => setNotes(data))
+            .catch((error) => console.error(error));
+    }, [showAddNoteForm]);
 
     const demoData = {
         name: "Zadanie z matematyki",
@@ -28,10 +41,14 @@ const Dashboard = () => {
         });
     };
 
+    const handleCloseForm = () => {
+        if (showAddTaskForm === true) handleAddTaskFormChange();
+        else if (showAddNoteForm === true) handleAddNoteFormChange();
+    };
+
     const handleEscKey = (event) => {
         if (event.keyCode === 27) {
-            if (showAddTaskForm === true) handleAddTaskFormChange();
-            else if (showAddNoteForm === true) handleAddNoteFormChange();
+            handleCloseForm();
         }
     };
 
@@ -43,13 +60,17 @@ const Dashboard = () => {
         };
     }, [showAddNoteForm, showAddNoteForm]);
 
-    const handleAddNote = (name, description) => {};
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const options = { day: "numeric", month: "long" };
+        return date.toLocaleDateString("pl-PL", options);
+    };
 
     return (
         <>
-            {showAddTaskForm && <AddTaskForm />}
+            <AddTaskForm />
             {showAddNoteForm && (
-                <AddNoteForm handleAddNote={handleAddNote} />
+                <AddNoteForm handleCloseForm={handleCloseForm} />
             )}
             <div className='dashboard-topbar'></div>
             <div className='dashboard-main'>
@@ -139,7 +160,13 @@ const Dashboard = () => {
                 </div>
 
                 <div className='dashboard-right'>
-                    <button className='button-add-note'>
+                    <button
+                        className='button-add-note'
+                        onClick={() => {
+                            showAddNoteForm === false &&
+                                handleAddNoteFormChange();
+                        }}
+                    >
                         <FontAwesomeIcon
                             icon={faPlus}
                             style={{ fontSize: "110%" }}
@@ -149,12 +176,20 @@ const Dashboard = () => {
                         </div>
                     </button>
                     <div className='dashboard-right-content'>
-                        <Note />
-                        <Note />
-                        <Note />
-                        <Note />
-                        <Note />
-                        <Note />
+                        {notes.length === 0 ? (
+                            <div className='loader'>
+                                <Waveform size={55} color='#231F20' />
+                            </div>
+                        ) : (
+                            notes.map((note) => (
+                                <Note
+                                    key={note.id}
+                                    header={note.name}
+                                    desc={note.description}
+                                    date={formatDate(note.created_at)}
+                                />
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

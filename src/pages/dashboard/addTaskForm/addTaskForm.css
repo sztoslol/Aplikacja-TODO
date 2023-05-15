@@ -77,11 +77,41 @@
 .taskForm-desc {
     resize: none;
     padding: 15px;
-    height: 213px;
+    height: 180px;
 }
 
 .taskForm-input-desc {
     margin-top: 20px;
+}
+
+.datepicker-header {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #233140;
+}
+
+.datepicker {
+    border-radius: 6px;
+    border: none;
+    width: 364px;
+    height: 30px;
+    background-color: #0000000a;
+    box-sizing: border-box;
+    padding-left: 15px;
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #233140;
+    margin-top: 3px;
+}
+
+.datepicker:focus {
+    outline: none;
 }
 
 .taskForm-dropdown {
@@ -132,12 +162,12 @@
     color: #233140;
     margin-top: 3px;
     width: 364px;
-    height: fit-content;
+    max-height: 180px;
     max-height: 180px;
     background-color: #0000000a;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 50px;
     padding: 10px;
     border-radius: 6px;
     box-sizing: border-box;
@@ -154,6 +184,7 @@
     border-radius: 6px;
     display: flex;
     justify-content: space-between;
+    margin: 3px;
 }
 
 .dropdown-icon {
@@ -162,6 +193,10 @@
 
 .taskForm-dropdown-element:hover {
     cursor: pointer;
+    background-color: #00000012;
+}
+
+.selected {
     background-color: #00000012;
 }
 

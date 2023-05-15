@@ -1,10 +1,30 @@
 import "./addTaskForm.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faCirclePlus } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const AddTaskForm = () => {
+    const [taskData, setTaskData] = useState({
+        name: "",
+        description: "",
+        due_date: "",
+        target_users: [],
+    });
+
     const [dropdownVisibility, setdropdownVisibility] = useState("none");
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [users, setUsers] = useState([]);
+
+    console.log(taskData);
+
+    useEffect(() => {
+        fetch("http://localhost:3010/users")
+            .then((response) => response.json())
+            .then((data) => setUsers(data))
+            .catch((error) => console.error(error));
+    }, []);
 
     const handleChangeDropdown = () => {
         setdropdownVisibility((prev) => {
@@ -13,8 +33,61 @@ const AddTaskForm = () => {
         });
     };
 
-    const text = "Monika Napierała, Jarosław Napierała";
-    const truncatedText = text.length > 30 ? text.slice(0, 30) + "..." : text;
+    const handleNameInputChange = (event) => {
+        setTaskData((prevState) => ({
+            ...prevState,
+            name: event.target.value,
+        }));
+    };
+
+    const handleDescriptionInputChange = (event) => {
+        setTaskData((prevState) => ({
+            ...prevState,
+            description: event.target.value,
+        }));
+    };
+
+    const handleDue_dateInputChange = (date) => {
+        setTaskData((prevState) => ({
+            ...prevState,
+            due_date: date,
+        }));
+    };
+
+    const handleTargetUserClick = (user) => {
+        const { target_users } = taskData;
+        const updatedUsers = target_users.includes(user)
+            ? target_users.filter((u) => u !== user)
+            : [...target_users, user];
+
+        setTaskData((prevTaskData) => ({
+            ...prevTaskData,
+            target_users: updatedUsers,
+        }));
+    };
+
+    const handleButtonClick = () => {
+        fetch("http://localhost:3010/tasks", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(taskData),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Error adding task");
+                }
+                console.log("Task added successfully");
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+    };
+
+    const truncatedText = (text) => {
+        return text.length > 30 ? text.slice(0, 30) + "..." : text;
+    };
 
     return (
         <div className='taskForm-main'>
@@ -30,6 +103,8 @@ const AddTaskForm = () => {
                     type='text'
                     className='taskForm-taskname'
                     placeholder='Przykładowa nazwa zadania'
+                    value={taskData.name}
+                    onChange={handleNameInputChange}
                 />
             </div>
 
@@ -39,6 +114,19 @@ const AddTaskForm = () => {
                     type='text'
                     className='taskForm-desc'
                     placeholder='Przykładowy opis zadania'
+                    value={taskData.description}
+                    onChange={handleDescriptionInputChange}
+                />
+            </div>
+
+            <div className='datepicker-outer'>
+                <div className='datepicker-header'>Data wykonania</div>
+                <ReactDatePicker
+                    selected={taskData.due_date}
+                    onChange={handleDue_dateInputChange}
+                    className='datepicker'
+                    dateFormat='yyyy-MM-dd'
+                    placeholderText='Wybierz datę wykonania'
                 />
             </div>
 
@@ -48,7 +136,9 @@ const AddTaskForm = () => {
                     className='taskForm-dropdown-main'
                     onClick={() => handleChangeDropdown()}
                 >
-                    {truncatedText}
+                    {taskData.target_users.length <= 0
+                        ? "Wybierz osoby"
+                        : truncatedText(taskData.target_users.join(", "))}
                     <div className='taskForm-dropdown-main-icon'>
                         <FontAwesomeIcon icon={faChevronDown} />
                     </div>
@@ -57,24 +147,34 @@ const AddTaskForm = () => {
                     className='taskForm-dropdown-users'
                     style={{ display: dropdownVisibility }}
                 >
-                    <div className='taskForm-dropdown-element'>
-                        Adam admin{" "}
-                        <FontAwesomeIcon
-                            icon={faCirclePlus}
-                            className='dropdown-icon'
-                        />
-                    </div>
-                    <div className='taskForm-dropdown-element'>
-                        Generał napierał
-                        <FontAwesomeIcon
-                            icon={faCirclePlus}
-                            className='dropdown-icon'
-                        />
-                    </div>
+                    {users.length > 0 &&
+                        users.map((user) => (
+                            <div
+                                className={`taskForm-dropdown-element ${
+                                    taskData.target_users.includes(user.login)
+                                        ? "selected"
+                                        : ""
+                                }`}
+                                onClick={() =>
+                                    handleTargetUserClick(user.login)
+                                }
+                                key={user.login}
+                            >
+                                {user.login}
+                                <FontAwesomeIcon
+                                    icon={faCirclePlus}
+                                    className='dropdown-icon'
+                                />
+                            </div>
+                        ))}
                 </div>
             </div>
 
-            <button className='taskForm-button' type='button'>
+            <button
+                className='taskForm-button'
+                type='button'
+                onClick={() => handleButtonClick()}
+            >
                 Potwierdź
             </button>
         </div>

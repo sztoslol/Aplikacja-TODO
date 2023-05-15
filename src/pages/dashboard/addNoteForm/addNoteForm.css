@@ -74,6 +74,14 @@
     outline: none;
 }
 
+.noteForm-input-notename-top,
+.noteForm-input-notedesc-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 100%;
+}
+
 .noteForm-desc {
     resize: none;
     padding: 15px;
