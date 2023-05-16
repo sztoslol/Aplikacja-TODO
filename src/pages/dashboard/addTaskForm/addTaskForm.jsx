@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const AddTaskForm = () => {
+const AddTaskForm = ({ handleCloseForm }) => {
     const [taskData, setTaskData] = useState({
         name: "",
         description: "",
@@ -77,6 +77,7 @@ const AddTaskForm = () => {
                     throw new Error("Error adding task");
                 }
                 console.log("Task added successfully");
+                handleCloseForm();
             })
             .catch((error) => {
                 console.error("Error:", error);

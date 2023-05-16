@@ -177,7 +177,7 @@ const Dashboard = () => {
                             style={{ fontSize: "110%" }}
                         />
                         <div className='button-add-note-text'>
-                            Dodaj zadanie
+                            Dodaj notatkę
                         </div>
                     </button>
                     <div className='dashboard-right-content'>

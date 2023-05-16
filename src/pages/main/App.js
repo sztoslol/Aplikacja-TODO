@@ -11,7 +11,7 @@ const App = () => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(() => {
         if (Cookies.get("isLoggedIn") === "true") return true;
-        else if (sessionStorage.getItem("isLoggedIn") == "true") return true;
+        else if (sessionStorage.getItem("isLoggedIn") === "true") return true;
         else return false;
     });
 
@@ -19,7 +19,7 @@ const App = () => {
         sessionStorage.setItem("isLoggedIn", "true");
         setIsLoggedIn(() => {
             if (Cookies.get("isLoggedIn") === "true") return true;
-            else if (sessionStorage.getItem("isLoggedIn") == "true")
+            else if (sessionStorage.getItem("isLoggedIn") === "true")
                 return true;
             else return false;
         });

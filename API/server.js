@@ -46,7 +46,7 @@ app.get("/users/:login", (req, res) => {
     const login = req.params.login;
 
     connection.query(
-        "SELECT * FROM users WHERE login = ?",
+        "SELECT * FROM users WHERE login = ? COLLATE utf8mb4_bin",
         [login],
         (err, results) => {
             if (err) {

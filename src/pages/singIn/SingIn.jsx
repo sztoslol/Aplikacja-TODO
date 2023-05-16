@@ -53,6 +53,7 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
             dotLogin.current.style.display = "block";
             errorLogin.current.style.display = "block";
             errorLogin.current.textContent = "Błędny login lub hasło";
+            console.log("1");
         } else {
             dotLogin.current.style.display = "none";
             errorLogin.current.style.display = "none";
@@ -89,44 +90,47 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
     };
 
     const handleLogIn = () => {
-        if (!userData.login) {
-            dotLogin.current.style.display = "block";
-            errorLogin.current.style.display = "block";
-            errorLogin.current.textContent = "Uzupełnij to pole!";
-        } else {
-            dotLogin.current.style.display = "none";
-            errorLogin.current.style.display = "none";
-        }
+        if (!userData.login || !userData.password) {
+            if (!userData.login) {
+                dotLogin.current.style.display = "block";
+                errorLogin.current.style.display = "block";
+                errorLogin.current.textContent = "Uzupełnij to pole!";
+            } else {
+                dotLogin.current.style.display = "none";
+                errorLogin.current.style.display = "none";
+            }
 
-        if (!userData.password) {
-            dotPassword.current.style.display = "block";
-            errorPassword.current.style.display = "block";
-            errorPassword.current.textContent = "Uzupełnij to pole!";
+            if (!userData.password) {
+                dotPassword.current.style.display = "block";
+                errorPassword.current.style.display = "block";
+                errorPassword.current.textContent = "Uzupełnij to pole!";
+            } else {
+                dotPassword.current.style.display = "none";
+                errorPassword.current.style.display = "none";
+            }
             return;
         } else {
-            dotPassword.current.style.display = "none";
-            errorPassword.current.style.display = "none";
+            fetch(`http://localhost:3010/users/${userData.login}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.exists) {
+                        handleUserDataCheck(data.user);
+                    }
+                    if (!data.exists) {
+                        console.log("Użytkownik nie istnieje");
+                        dotLogin.current.style.display = "block";
+                        errorLogin.current.style.display = "block";
+                        errorLogin.current.textContent =
+                            "Błędny login lub hasło";
+                    } else {
+                        dotLogin.current.style.display = "none";
+                        errorLogin.current.style.display = "none";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Błąd pobierania danych użytkownika:", error);
+                });
         }
-
-        fetch(`http://localhost:3010/users/${userData.login}`)
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.exists) {
-                    handleUserDataCheck(data.user);
-                }
-                if (!data.exists) {
-                    console.log("Użytkownik nie istnieje");
-                    dotLogin.current.style.display = "block";
-                    errorLogin.current.style.display = "block";
-                    errorLogin.current.textContent = "Błędny login lub hasło";
-                } else {
-                    dotLogin.current.style.display = "none";
-                    errorLogin.current.style.display = "none";
-                }
-            })
-            .catch((error) => {
-                console.error("Błąd pobierania danych użytkownika:", error);
-            });
     };
 
     return (
