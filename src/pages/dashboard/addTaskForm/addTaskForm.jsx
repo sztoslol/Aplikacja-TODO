@@ -17,8 +17,6 @@ const AddTaskForm = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [users, setUsers] = useState([]);
 
-    console.log(taskData);
-
     useEffect(() => {
         fetch("http://localhost:3010/users")
             .then((response) => response.json())

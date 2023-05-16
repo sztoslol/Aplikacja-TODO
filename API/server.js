@@ -110,6 +110,17 @@ app.post("/notes", (req, res) => {
     );
 });
 
+app.get("/tasks", (req, res) => {
+    connection.query("SELECT * FROM tasks", (err, results) => {
+        if (err) {
+            console.error("Error querying database:", err);
+            res.status(500).send("Error querying database");
+        } else {
+            res.json(results);
+        }
+    });
+});
+
 app.post("/tasks", (req, res) => {
     const { name, description, due_date, target_users } = req.body;
 

@@ -12,7 +12,7 @@ import { Waveform } from "@uiball/loaders";
     Obłsuga formularzy(w tym dodanie danych do bazy) znajduje się w ich komponentach
     
     TODO: 
-        -> Pliki cookies => token + baza danych
+        X Pliki cookies => token + baza danych
         -> Naprawa formularzy 
         -> Dodanie edycji zadań
         -> Naprawa błędnego przypisywania dat z formularza zadań :zbadać: -> 
@@ -21,9 +21,9 @@ import { Waveform } from "@uiball/loaders";
         -> Wstępne testy formularzy ->
             => Logowanie
             => Rejstracja
-            => Dodawanie zadań
+            => Dodawanie zadań (w trakcie tworzenia)
             => Dodawanie notatek
-        
+        -> Dodać ulubione zadania
         -= Nie uwzględniono dashboard -> dokończyć =-
 */
 
@@ -31,6 +31,7 @@ const Dashboard = () => {
     const [showAddNoteForm, setShowAddNoteForm] = useState(false);
     const [showAddTaskForm, setShowAddTaskForm] = useState(false);
     const [notes, setNotes] = useState([]);
+    const [tasks, setTasks] = useState([]);
 
     useEffect(() => {
         fetch("http://localhost:3010/notes")
@@ -39,11 +40,12 @@ const Dashboard = () => {
             .catch((error) => console.error(error));
     }, [showAddNoteForm]);
 
-    const demoData = {
-        name: "Zadanie z matematyki",
-        description: "Rozwiąż zadania z funkcji kwadratowej",
-        expiration_date: "2023-05-31",
-    };
+    useEffect(() => {
+        fetch("http://localhost:3010/tasks")
+            .then((response) => response.json())
+            .then((data) => setTasks(data))
+            .catch((error) => console.error(error));
+    }, [showAddTaskForm]);
 
     const handleAddTaskFormChange = () => {
         setShowAddTaskForm((prev) => {
@@ -54,6 +56,16 @@ const Dashboard = () => {
         setShowAddNoteForm((prev) => {
             return !prev;
         });
+    };
+
+    const handleShowAddTaskForm = () => {
+        if (showAddTaskForm === false && showAddNoteForm === false)
+            handleAddTaskFormChange();
+    };
+
+    const handleShowAddNoteForm = () => {
+        if (showAddNoteForm === false && showAddTaskForm === false)
+            handleAddNoteFormChange();
     };
 
     const handleCloseForm = () => {
@@ -73,7 +85,7 @@ const Dashboard = () => {
         return () => {
             document.removeEventListener("keydown", handleEscKey);
         };
-    }, [showAddNoteForm, showAddNoteForm]);
+    }, [showAddTaskForm, showAddNoteForm]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -83,14 +95,20 @@ const Dashboard = () => {
 
     return (
         <>
-            <AddTaskForm />
+            {showAddTaskForm && (
+                <AddTaskForm handleCloseForm={handleCloseForm} />
+            )}
             {showAddNoteForm && (
                 <AddNoteForm handleCloseForm={handleCloseForm} />
             )}
             <div className='dashboard-topbar'></div>
             <div className='dashboard-main'>
                 <div className='dashboard-left'>
-                    <button className='button-add-task' type='button'>
+                    <button
+                        className='button-add-task'
+                        type='button'
+                        onClick={() => handleShowAddTaskForm()}
+                    >
                         <FontAwesomeIcon
                             icon={faPlus}
                             style={{ fontSize: "110%" }}
@@ -132,55 +150,27 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div className='dashboard-content'>
-                    <Task
-                        header={demoData.name}
-                        desc={demoData.description}
-                        dueDate={demoData.expiration_date}
-                    />
-                    <Task
-                        header={demoData.name}
-                        desc={demoData.description}
-                        dueDate={demoData.expiration_date}
-                    />
-                    <Task
-                        header={demoData.name}
-                        desc={demoData.description}
-                        dueDate={demoData.expiration_date}
-                    />
-                    <Task
-                        header={demoData.name}
-                        desc={demoData.description}
-                        dueDate={demoData.expiration_date}
-                    />
-                    <Task
-                        header={demoData.name}
-                        desc={demoData.description}
-                        dueDate={demoData.expiration_date}
-                    />
-                    <Task
-                        header={demoData.name}
-                        desc={demoData.description}
-                        dueDate={demoData.expiration_date}
-                    />
-                    <Task
-                        header={demoData.name}
-                        desc={demoData.description}
-                        dueDate={demoData.expiration_date}
-                    />
-                    <Task
-                        header={demoData.name}
-                        desc={demoData.description}
-                        dueDate={demoData.expiration_date}
-                    />
+                    {tasks.length > 0 ? (
+                        tasks.map((task) => (
+                            <Task
+                                key={task.id}
+                                header={task.name}
+                                desc={task.description}
+                                dueDate={task.due_date}
+                                createdAt={task.created_at}
+                            />
+                        ))
+                    ) : (
+                        <div className='loader'>
+                            <Waveform size={55} color='#231F20' />
+                        </div>
+                    )}
                 </div>
 
                 <div className='dashboard-right'>
                     <button
                         className='button-add-note'
-                        onClick={() => {
-                            showAddNoteForm === false &&
-                                handleAddNoteFormChange();
-                        }}
+                        onClick={() => handleShowAddNoteForm()}
                     >
                         <FontAwesomeIcon
                             icon={faPlus}
@@ -191,11 +181,7 @@ const Dashboard = () => {
                         </div>
                     </button>
                     <div className='dashboard-right-content'>
-                        {notes.length === 0 ? (
-                            <div className='loader'>
-                                <Waveform size={55} color='#231F20' />
-                            </div>
-                        ) : (
+                        {notes.length > 0 ? (
                             notes.map((note) => (
                                 <Note
                                     key={note.id}
@@ -204,6 +190,10 @@ const Dashboard = () => {
                                     date={formatDate(note.created_at)}
                                 />
                             ))
+                        ) : (
+                            <div className='loader'>
+                                <Waveform size={55} color='#231F20' />
+                            </div>
                         )}
                     </div>
                 </div>

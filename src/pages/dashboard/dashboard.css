@@ -107,9 +107,12 @@
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
-    justify-content: center;
+    justify-content: space-between;
     gap: 20px;
     overflow-y: auto;
+    position: relative;
+    padding: 0 15px;
+    box-sizing: border-box;
 }
 
 /*==========================Notes=======================*/
@@ -148,7 +151,7 @@
     box-sizing: border-box;
     gap: 10px;
     margin-top: 20px;
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 63%;
     position: relative;
 }

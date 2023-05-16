@@ -76,7 +76,7 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
                                     userData.password,
                                     10
                                 ),
-                                type: data.typ_uzytkownika,
+                                type: data.role,
                             }),
                             { expires: 7 }
                         );
