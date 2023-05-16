@@ -5,7 +5,9 @@ import { faPen } from "@fortawesome/free-solid-svg-icons";
 const Note = ({ header, desc, date }) => {
     return (
         <div className='note-main'>
-            <div className='note-header'>{header}</div>
+            <div className='note-header'>{header}
+            <div className='note-header-edit'>•••</div>
+            </div>
             <div className='note-description'>{desc}</div>
             <div className='note-footer'>
                 <FontAwesomeIcon icon={faPen} />

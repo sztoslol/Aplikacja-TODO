@@ -17,8 +17,15 @@
     font-size: 16px;
     line-height: 19px;
     margin-bottom: 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    
 }
 
+.note-header-edit:hover {
+    cursor: pointer;
+}
 .note-description {
     color: #233140;
     font-family: "Capriola";
