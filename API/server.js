@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const mysql = require("mysql2");
 const app = express();
 
@@ -15,6 +16,8 @@ app.use((req, res, next) => {
     );
     next();
 });
+
+app.use(cors());
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -123,11 +126,17 @@ app.get("/tasks", (req, res) => {
 
 app.post("/tasks", (req, res) => {
     const { name, description, due_date, target_users } = req.body;
+    const formattedDueDate = new Date(due_date);
+    const year = formattedDueDate.getFullYear();
+    const month = String(formattedDueDate.getMonth() + 1).padStart(2, "0");
+    const day = String(formattedDueDate.getDate()).padStart(2, "0");
+
+    const formattedDate = `${year}-${month}-${day}`;
 
     const taskQuery = `INSERT INTO tasks (name, description, due_date) VALUES (?, ?, ?)`;
     connection.query(
         taskQuery,
-        [name, description, due_date],
+        [name, description, formattedDate],
         (taskErr, taskResults) => {
             if (taskErr) {
                 console.error("Error inserting task:", taskErr);
@@ -178,6 +187,94 @@ app.post("/tasks", (req, res) => {
             }
         }
     );
+});
+
+app.get("/tasks/:login", (req, res) => {
+    const login = req.params.login;
+    const filter = req.query.filter;
+
+    let query = `
+      SELECT t.*, ut.is_favorite
+      FROM tasks t
+      INNER JOIN user_tasks ut ON t.id = ut.task_id
+      INNER JOIN users u ON u.id = ut.user_id`;
+
+    if (login !== "none") {
+        query += `
+          WHERE u.login = ?`;
+    }
+
+    console.log(query);
+    switch (filter) {
+        case "saved":
+            query += `
+            AND t.id IN (
+                SELECT task_id
+                FROM user_tasks
+                WHERE user_id = (
+                    SELECT id
+                    FROM users
+                    WHERE login = ?
+                )
+                AND is_favorite = 1
+            )`;
+            break;
+        case "completed":
+            const today = new Date().toISOString().split("T")[0];
+            query += `
+            AND t.id IN (
+                SELECT id
+                FROM tasks
+                WHERE id = t.id
+                AND due_date <= '${today}'
+            )`;
+            break;
+        case "upcoming":
+            const today_upcoming = new Date().toISOString().split("T")[0];
+            const threeDaysFromNow = new Date(
+                Date.now() + 3 * 24 * 60 * 60 * 1000
+            )
+                .toISOString()
+                .split("T")[0];
+            query += ` AND t.due_date BETWEEN '${today_upcoming}' AND '${threeDaysFromNow}'`;
+            console.log(query);
+            break;
+        default:
+            console.log(query);
+            break;
+    }
+
+    connection.query(query, [login, login], (err, results) => {
+        if (err) {
+            console.error("Error querying database:", err);
+            res.status(500).send("Error querying database");
+        } else {
+            console.log(results);
+            res.json(results);
+        }
+    });
+});
+
+app.put("/tasks/favorite", (req, res) => {
+    const taskId = req.body.taskId;
+    const userId = req.body.userId;
+    const isFavorite = req.body.isFavorite;
+
+    const query = `
+      UPDATE user_tasks
+      SET is_favorite = ?
+      WHERE user_id = ?
+      AND task_id = ?
+    `;
+
+    connection.query(query, [isFavorite, userId, taskId], (err, results) => {
+        if (err) {
+            console.error("Error updating task favorite status:", err);
+            res.status(500).send("Error updating task favorite status");
+        } else {
+            res.sendStatus(200);
+        }
+    });
 });
 
 app.listen(3010, () => {

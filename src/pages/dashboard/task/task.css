@@ -84,3 +84,12 @@
     font-size: 16px;
     line-height: 20px;
 }
+
+.bookmark-icon {
+    font-size: 150%;
+    color: "#233140";
+}
+
+.bookmark-icon:hover {
+    cursor: pointer;
+}

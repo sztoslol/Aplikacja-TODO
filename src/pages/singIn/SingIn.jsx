@@ -68,19 +68,8 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
                     errorLogin.current.style.display = "none";
 
                     if (userData.rememberMe) {
+                        Cookies.set("login", userData.login, { expires: 7 });
                         Cookies.set("isLoggedIn", true, { expires: 7 });
-                        Cookies.set(
-                            "user",
-                            JSON.stringify({
-                                login: userData.login,
-                                password: bcrypt.hashSync(
-                                    userData.password,
-                                    10
-                                ),
-                                type: data.role,
-                            }),
-                            { expires: 7 }
-                        );
                     }
 
                     onLogin();

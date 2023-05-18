@@ -1,33 +1,49 @@
-import "./task.css";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBookmark } from "@fortawesome/free-solid-svg-icons";
+import { faBookmark as bookmarkFiled } from "@fortawesome/free-solid-svg-icons";
+import { faBookmark as bookmarkEmpty } from "@fortawesome/free-regular-svg-icons";
+import { useState } from "react";
+import "./task.css";
 
-const Task = ({ header, desc, dueDate, createdAt }) => {
+const Task = ({
+    header,
+    desc,
+    dueDate,
+    createdAt,
+    isFavorite,
+    taskID,
+    handleChangeFavorite,
+}) => {
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const options = { day: "numeric", month: "long" };
         return date.toLocaleDateString("pl-PL", options);
     };
 
-    const calculateDaysFromDate = (odDaty) => {
-        const dzis = new Date();
-        const od = new Date(odDaty);
+    const calculateDaysFromDate = (fromDate) => {
+        const today = new Date();
+        const from = new Date(fromDate);
+        from.setHours(0, 0, 0, 0);
 
-        const roznicaCzasu = dzis.getTime() - od.getTime();
-        const roznicaDni = Math.floor(roznicaCzasu / (1000 * 60 * 60 * 24));
+        const timeDifference = today.getTime() - from.getTime();
+        const daysDifference = Math.floor(
+            timeDifference / (1000 * 60 * 60 * 24)
+        );
 
-        return roznicaDni;
+        return daysDifference;
     };
 
-    const calculateDaysBetweenDates = (dataStworzenia, deadline) => {
-        const dataStworzeniaObj = new Date(dataStworzenia);
-        const deadlineObj = new Date(deadline);
+    const calculateDaysBetweenDates = (startDate, endDate) => {
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(0, 0, 0, 0);
 
-        const roznicaCzasu =
-            deadlineObj.getTime() - dataStworzeniaObj.getTime();
-        const roznicaDni = Math.floor(roznicaCzasu / (1000 * 60 * 60 * 24));
+        const timeDifference = endDateObj.getTime() - startDateObj.getTime();
+        const daysDifference = Math.floor(
+            timeDifference / (1000 * 60 * 60 * 24)
+        );
 
-        return roznicaDni + 1;
+        return daysDifference + 1;
     };
 
     const calculateElapsedDaysPercentage = (elapsedDays, totalDays) => {
@@ -35,12 +51,30 @@ const Task = ({ header, desc, dueDate, createdAt }) => {
         return percentage.toFixed(2);
     };
 
-    console.log(
-        calculateElapsedDaysPercentage(
-            calculateDaysFromDate(createdAt),
-            calculateDaysBetweenDates(createdAt, dueDate)
-        )
+    const elapsedDays = calculateDaysFromDate(createdAt);
+    const totalDays = calculateDaysBetweenDates(createdAt, dueDate);
+    const progressPercentage = calculateElapsedDaysPercentage(
+        elapsedDays,
+        totalDays
     );
+
+    let progressWidth = progressPercentage + "%";
+    let taskStatus = "";
+
+    if (elapsedDays > totalDays) {
+        progressWidth = "100%";
+        taskStatus = "Zakończone";
+    }
+
+    const [Favorite, setFavorite] = useState(isFavorite);
+
+    const toggleFavorite = () => {
+        setFavorite((prev) => {
+            const newFavorite = prev === 1 ? 0 : 1;
+            handleChangeFavorite(taskID, newFavorite);
+            return newFavorite;
+        });
+    };
 
     return (
         <div className='task-main'>
@@ -52,35 +86,25 @@ const Task = ({ header, desc, dueDate, createdAt }) => {
                 <div className='task-bottom-description'>{desc}</div>
 
                 <div className='task-bottom-countdown'>
-                    {calculateDaysFromDate(createdAt)}
-                    {"/"}
-                    {calculateDaysBetweenDates(createdAt, dueDate)}
-                    {" dni do wykonania"}
+                    {elapsedDays > totalDays
+                        ? "Zakończone"
+                        : `${elapsedDays}/${totalDays} dni do wykonania`}
                 </div>
 
                 <div className='task-bottom-progressbar-outer'>
                     <div
                         className='task-bottom-progressbar-inner'
                         style={{
-                            width:
-                                calculateElapsedDaysPercentage(
-                                    calculateDaysFromDate(createdAt),
-                                    calculateDaysBetweenDates(
-                                        createdAt,
-                                        dueDate
-                                    )
-                                ) + "%",
+                            width: progressWidth,
                         }}
                     ></div>
                 </div>
 
                 <div className='task-bottom-footer'>
                     <FontAwesomeIcon
-                        icon={faBookmark}
-                        style={{
-                            fontSize: "150%",
-                            color: "#233140",
-                        }}
+                        icon={Favorite ? bookmarkFiled : bookmarkEmpty}
+                        className='bookmark-icon'
+                        onClick={toggleFavorite}
                     />
                     <div className='task-bottom-footer-text'>
                         {formatDate(dueDate)}
