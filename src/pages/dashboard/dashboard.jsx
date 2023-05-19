@@ -5,6 +5,7 @@ import AddTaskForm from "./addTaskForm/addTaskForm";
 import AddNoteForm from "./addNoteForm/addNoteForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { Setting2, LogoutCurve } from "iconsax-react";
 import { useState, useEffect } from "react";
 import { Waveform } from "@uiball/loaders";
 import Cookies from "js-cookie";
@@ -22,6 +23,7 @@ import Cookies from "js-cookie";
             => Dodawanie zadań (w trakcie tworzenia)
             => Dodawanie notatek
         -> Dodać ulubione zadania
+        -> Zablokować możlowość loginu `none`
         -= Nie uwzględniono dashboard -> dokończyć =-
 */
 
@@ -163,62 +165,67 @@ const Dashboard = ({ onLogOut }) => {
             {showAddNoteForm && (
                 <AddNoteForm handleCloseForm={handleCloseForm} />
             )}
-            <div className='dashboard-topbar'></div>
-            <div className='dashboard-main'>
-                <div className='dashboard-left'>
+            <div className='dashboard-topbar'>
+                <div className='dashboard-topbar-taskList'>
+                    <input
+                        type='radio'
+                        id='all'
+                        name='radio-filter'
+                        value='all'
+                        checked={selectedOption === "all"}
+                        onChange={() => setSelectedOption("all")}
+                    />
+                    <label htmlFor='all'>Wszystkie</label>
+                    <input
+                        type='radio'
+                        id='saved'
+                        name='radio-filter'
+                        value='saved'
+                        checked={selectedOption === "saved"}
+                        onChange={() => setSelectedOption("saved")}
+                    />
+                    <label htmlFor='saved'>Zapisane</label>
+                    <input
+                        type='radio'
+                        id='completed'
+                        name='radio-filter'
+                        value='completed'
+                        checked={selectedOption === "completed"}
+                        onChange={() => setSelectedOption("completed")}
+                    />
+                    <label htmlFor='completed'>Wykonane</label>
+                    <input
+                        type='radio'
+                        id='upcoming'
+                        name='radio-filter'
+                        value='upcoming'
+                        checked={selectedOption === "upcoming"}
+                        onChange={() => setSelectedOption("upcoming")}
+                    />
+                    <label htmlFor='upcoming'>Nadchodzące</label>
+                </div>
+                <div className='dashboard-topbar-menu'>
                     <button
-                        className='button-add-task'
-                        type='button'
+                        className='dashboard-topbar-menu-btn'
                         onClick={() => handleShowAddTaskForm()}
                     >
-                        <FontAwesomeIcon
-                            icon={faPlus}
-                            style={{ fontSize: "110%" }}
-                        />
-                        <div className='button-add-task-text'>
-                            Dodaj zadanie
-                        </div>
+                        Dodaj zadanie
                     </button>
-
-                    <div className='dashboard-taskList'>
-                        <input
-                            type='radio'
-                            id='all'
-                            name='radio-filter'
-                            value='all'
-                            checked={selectedOption === "all"}
-                            onChange={() => setSelectedOption("all")}
-                        />
-                        <label htmlFor='all'>Wszystkie</label>
-                        <input
-                            type='radio'
-                            id='saved'
-                            name='radio-filter'
-                            value='saved'
-                            checked={selectedOption === "saved"}
-                            onChange={() => setSelectedOption("saved")}
-                        />
-                        <label htmlFor='saved'>Zapisane</label>
-                        <input
-                            type='radio'
-                            id='completed'
-                            name='radio-filter'
-                            value='completed'
-                            checked={selectedOption === "completed"}
-                            onChange={() => setSelectedOption("completed")}
-                        />
-                        <label htmlFor='completed'>Wykonane</label>
-                        <input
-                            type='radio'
-                            id='upcoming'
-                            name='radio-filter'
-                            value='upcoming'
-                            checked={selectedOption === "upcoming"}
-                            onChange={() => setSelectedOption("upcoming")}
-                        />
-                        <label htmlFor='upcoming'>Nadchodzące</label>
-                    </div>
+                    <button
+                        className='dashboard-topbar-menu-btn'
+                        onClick={() => handleShowAddNoteForm()}
+                    >
+                        Dodaj notatke
+                    </button>
+                    <button className='dashboard-topbar-menu-minibtn'>
+                        <Setting2 />
+                    </button>
+                    <button className='dashboard-topbar-menu-minibtn'>
+                        <LogoutCurve onClick={() => onLogOut()} />
+                    </button>
                 </div>
+            </div>
+            <div className='dashboard-main'>
                 <div className='dashboard-content'>
                     {!isTasksLoading ? (
                         tasks.length > 0 ? (
@@ -244,19 +251,9 @@ const Dashboard = ({ onLogOut }) => {
                     )}
                 </div>
 
+                <div className='separator'></div>
+
                 <div className='dashboard-right'>
-                    <button
-                        className='button-add-note'
-                        onClick={() => handleShowAddNoteForm()}
-                    >
-                        <FontAwesomeIcon
-                            icon={faPlus}
-                            style={{ fontSize: "110%" }}
-                        />
-                        <div className='button-add-note-text'>
-                            Dodaj notatkę
-                        </div>
-                    </button>
                     <div className='dashboard-right-content'>
                         {!isNotesLoading ? (
                             notes.length > 0 ? (
@@ -266,6 +263,7 @@ const Dashboard = ({ onLogOut }) => {
                                         header={note.name}
                                         desc={note.description}
                                         date={formatDate(note.created_at)}
+                                        id={note.id}
                                     />
                                 ))
                             ) : (

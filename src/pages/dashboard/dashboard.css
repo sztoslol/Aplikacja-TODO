@@ -13,11 +13,16 @@
     height: 100%;
     width: 100%;
     display: flex;
+    justify-content: space-between;
 }
 
 .dashboard-topbar {
-    height: 75px;
+    height: 125px;
     width: 100%;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
 }
 
 .dashboard-left {
@@ -51,23 +56,23 @@
     margin-left: 7px;
 }
 
-/* ==============================Task list==========================*/
-.dashboard-taskList input {
+/* ==============================Topbar==========================*/
+
+.dashboard-topbar-taskList input {
     display: none;
 }
 
-.dashboard-taskList {
+.dashboard-topbar-taskList {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     color: #000;
-    border-radius: 10px;
-    width: 100%;
+    height: 100%;
     box-sizing: border-box;
-    gap: 3px;
+    gap: 48px;
+    padding-left: 97.5px;
 }
 
-.dashboard-taskList label {
-    width: 364px;
+.dashboard-topbar-taskList label {
     height: 64px;
     display: flex;
     align-items: center;
@@ -76,43 +81,83 @@
     transition: 0.2s ease-in-out;
     border-radius: 6px;
     box-sizing: border-box;
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    color: rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-topbar-taskList label:hover {
+    color: #00a6ff;
+}
+
+.dashboard-topbar-taskList input:checked + label {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    color: #65a3ff;
+}
+
+.dashboard-topbar-menu {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.dashboard-topbar-menu-btn {
+    width: 192px;
+    height: 64px;
+    padding: 22px;
+    box-sizing: border-box;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
     font-family: "Capriola";
     font-style: normal;
     font-weight: 400;
     font-size: 16px;
     line-height: 20px;
-    color: #233140;
+    color: #000000;
+    margin-right: 20px;
+    background-color: rgba(0, 0, 0, 0);
 }
 
-.dashboard-taskList label:hover {
-    background-color: #00a6ff;
-    color: #fff;
+.dashboard-topbar-menu-btn:hover {
+    cursor: pointer;
 }
 
-.dashboard-taskList input:checked + label {
-    background-color: #47bdff;
-    font-family: "Capriola";
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 20px;
-    color: #ffffff;
+.dashboard-topbar-menu-minibtn {
+    width: 64px;
+    height: 64px;
+    box-sizing: border-box;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    margin-right: 20px;
+    background-color: rgba(0, 0, 0, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboard-topbar-menu-minibtn:hover {
+    cursor: pointer;
 }
 
 /*==========================Content=======================*/
 .dashboard-content {
-    width: 800px;
-    height: 70%;
-    margin: 15px 0;
+    height: 863px;
+    width: 1058px;
+    margin-left: 97.5px;
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
-    justify-content: space-between;
-    gap: 20px;
     overflow-y: auto;
     position: relative;
-    padding: 0 15px;
-    box-sizing: border-box;
+    gap: 28px;
+    margin-top: 28px;
 }
 
 .no-tasks,
@@ -122,31 +167,22 @@
     font-size: 26px;
     color: #223346;
     position: absolute;
-    top: 50%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
-/*==========================Notes=======================*/
-.dashboard-right {
-    width: 666px;
-    padding: 15px;
+/*==========================Separator=======================*/
+.separator {
+    margin: 0 40px;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    height: 894px;
 }
 
-.button-add-note {
-    height: 64px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: "Capriola";
-    font-style: normal;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 20px;
-    color: #233140;
-    border: 2px solid #00000014;
-    border-radius: 6px;
+/*==========================Notes=======================*/
+.dashboard-right {
+    margin-right: 97.5px;
+    margin-top: 28px;
 }
 
 .button-add-note:hover {
@@ -162,7 +198,6 @@
     flex-direction: column;
     box-sizing: border-box;
     gap: 10px;
-    margin-top: 20px;
     overflow-y: auto;
     height: 63%;
     position: relative;

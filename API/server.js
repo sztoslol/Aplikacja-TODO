@@ -277,6 +277,49 @@ app.put("/tasks/favorite", (req, res) => {
     });
 });
 
+app.delete("/notes/:id", (req, res) => {
+    const noteId = req.params.id;
+
+    const selectNoteQuery = "SELECT * FROM notes WHERE id = ?";
+    connection.query(selectNoteQuery, [noteId], (err, note) => {
+        if (err) {
+            console.error("Error querying database:", err);
+            res.status(500).send("Error querying database");
+        } else {
+            if (note.length === 0) {
+                res.status(404).send("Note not found");
+                return;
+            }
+
+            const deleteNoteQuery = "DELETE FROM notes WHERE id = ?";
+            connection.query(deleteNoteQuery, [noteId], (err) => {
+                if (err) {
+                    console.error("Error deleting note:", err);
+                    res.status(500).send("Error deleting note");
+                } else {
+                    const insertHistoryQuery =
+                        "INSERT INTO note_history (note_id, name, description, created_at) VALUES (?, ?, ?, ?)";
+                    const { id, name, description, created_at } = note[0];
+                    const values = [id, name, description, created_at];
+                    connection.query(insertHistoryQuery, values, (err) => {
+                        if (err) {
+                            console.error(
+                                "Error inserting note into history:",
+                                err
+                            );
+                            res.status(500).send(
+                                "Error inserting note into history"
+                            );
+                        } else {
+                            res.sendStatus(200);
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+
 app.listen(3010, () => {
     console.log("Server listening on port 3010");
 });

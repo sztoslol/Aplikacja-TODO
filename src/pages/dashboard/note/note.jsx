@@ -1,15 +1,19 @@
 import "./note.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen } from "@fortawesome/free-solid-svg-icons";
+import { Calendar, Trash } from "iconsax-react";
 
-const Note = ({ header, desc, date }) => {
+const Note = ({ header, desc, date, id }) => {
     return (
         <div className='note-main'>
             <div className='note-header'>{header}</div>
             <div className='note-description'>{desc}</div>
             <div className='note-footer'>
-                <FontAwesomeIcon icon={faPen} />
-                <div className='note-footer-text'>{date}</div>
+                <div className='note-footer-date'>
+                    <Calendar variant='Bold' />
+                    <div className='note-footer-text'>{date}</div>
+                </div>
+                <div className='note-footer-delate'>
+                    <Trash variant='Bold' />
+                </div>
             </div>
         </div>
     );

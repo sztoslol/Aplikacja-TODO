@@ -1,7 +1,5 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBookmark as bookmarkFiled } from "@fortawesome/free-solid-svg-icons";
-import { faBookmark as bookmarkEmpty } from "@fortawesome/free-regular-svg-icons";
+import { Calendar, ArchiveAdd, ArchiveTick, Trash, Edit2 } from "iconsax-react";
 import { useState } from "react";
 import "./task.css";
 
@@ -36,14 +34,20 @@ const Task = ({
     const calculateDaysBetweenDates = (startDate, endDate) => {
         const startDateObj = new Date(startDate);
         const endDateObj = new Date(endDate);
+        startDateObj.setHours(0, 0, 0, 0);
         endDateObj.setHours(0, 0, 0, 0);
 
         const timeDifference = endDateObj.getTime() - startDateObj.getTime();
         const daysDifference = Math.floor(
             timeDifference / (1000 * 60 * 60 * 24)
         );
-
-        return daysDifference + 1;
+        console.log(startDate);
+        console.log(endDate);
+        console.log(startDateObj);
+        console.log(endDateObj);
+        console.log(timeDifference);
+        console.log(daysDifference);
+        return daysDifference;
     };
 
     const calculateElapsedDaysPercentage = (elapsedDays, totalDays) => {
@@ -59,11 +63,9 @@ const Task = ({
     );
 
     let progressWidth = progressPercentage + "%";
-    let taskStatus = "";
 
-    if (elapsedDays > totalDays) {
+    if (elapsedDays >= totalDays) {
         progressWidth = "100%";
-        taskStatus = "Zakończone";
     }
 
     const [Favorite, setFavorite] = useState(isFavorite);
@@ -78,36 +80,53 @@ const Task = ({
 
     return (
         <div className='task-main'>
-            <div className='task-top'>
-                <div className='task-top-header'>{header}</div>
-                <div className='task-top-edit'>•••</div>
+            <div className='task-header'>{header}</div>
+
+            <div className='task-description'>{desc}</div>
+
+            <div className='task-countdown'>
+                {elapsedDays >= totalDays
+                    ? "Zakończone"
+                    : `${elapsedDays}/${totalDays} dni do wykonania`}
             </div>
-            <div className='task-bottom'>
-                <div className='task-bottom-description'>{desc}</div>
 
-                <div className='task-bottom-countdown'>
-                    {elapsedDays > totalDays
-                        ? "Zakończone"
-                        : `${elapsedDays}/${totalDays} dni do wykonania`}
-                </div>
+            <div className='task-progressbar-outer'>
+                <div
+                    className='task-progressbar-inner'
+                    style={{
+                        width: progressWidth,
+                    }}
+                ></div>
+            </div>
 
-                <div className='task-bottom-progressbar-outer'>
-                    <div
-                        className='task-bottom-progressbar-inner'
-                        style={{
-                            width: progressWidth,
-                        }}
-                    ></div>
-                </div>
-
-                <div className='task-bottom-footer'>
-                    <FontAwesomeIcon
-                        icon={Favorite ? bookmarkFiled : bookmarkEmpty}
-                        className='bookmark-icon'
-                        onClick={toggleFavorite}
-                    />
-                    <div className='task-bottom-footer-text'>
+            <div className='task-footer'>
+                <div className='task-footer-createdat'>
+                    <Calendar variant='Bold' />
+                    <div className='task-footer-text'>
                         {formatDate(dueDate)}
+                    </div>
+                </div>
+                <div className='task-footer-edit'>
+                    <div className='task-footer-edit-element'>
+                        {Favorite ? (
+                            <ArchiveTick
+                                className='edit-icon'
+                                onClick={toggleFavorite}
+                                variant='Bold'
+                            />
+                        ) : (
+                            <ArchiveAdd
+                                className='edit-icon'
+                                onClick={toggleFavorite}
+                                variant='Bold'
+                            />
+                        )}
+                    </div>
+                    <div className='task-footer-edit-element'>
+                        <Trash className='edit-icon' variant='Bold' />
+                    </div>
+                    <div className='task-footer-edit-element'>
+                        <Edit2 className='edit-icon' variant='Bold' />
                     </div>
                 </div>
             </div>
