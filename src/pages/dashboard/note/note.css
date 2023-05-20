@@ -1,0 +1,56 @@
+.note-main {
+    width: 539px;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    background-color: #0000000a;
+    box-sizing: border-box;
+    border-radius: 6px;
+    padding: 28px;
+}
+
+.note-header {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    color: #2f82ff;
+    margin-bottom: 20px;
+}
+
+.note-description {
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #233140;
+    margin-bottom: 20px;
+}
+
+.note-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.note-footer-date {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.note-footer-text {
+    color: #233140;
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    margin-left: 10px;
+}
+
+.note-footer-delate:hover {
+    cursor: pointer;
+}

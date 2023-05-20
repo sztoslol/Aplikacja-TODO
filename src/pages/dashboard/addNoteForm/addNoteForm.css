@@ -1,0 +1,117 @@
+.noteForm-main {
+    width: 450px;
+    height: fit-content;
+    border-radius: 6px;
+    background-color: #fff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-box-shadow: 6px 11px 45px -17px rgba(66, 68, 90, 1);
+    -moz-box-shadow: 6px 11px 45px -17px rgba(66, 68, 90, 1);
+    box-shadow: 6px 11px 45px -17px rgba(66, 68, 90, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 999;
+}
+
+.noteForm-header {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 47px;
+    color: #233140;
+    text-align: center;
+    margin-top: 25px;
+}
+
+.noteForm-subheader {
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 25px;
+    color: rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin-top: 10px;
+}
+
+.noteForm-input-notename {
+    margin-top: 30px;
+}
+
+.noteForm-input-notename-text,
+.noteForm-input-desc {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #233140;
+}
+
+.noteForm-notename,
+.noteForm-desc {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 6px;
+    width: 364px;
+    height: 64px;
+    border: none;
+    box-sizing: border-box;
+    padding-left: 17px;
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: rgba(0, 0, 0, 0.4);
+    margin-top: 3px;
+}
+
+.noteForm-notename,
+.noteForm-desc {
+    outline: none;
+}
+
+.noteForm-input-notename-top,
+.noteForm-input-notedesc-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.noteForm-desc {
+    resize: none;
+    padding: 15px;
+    height: 213px;
+}
+
+.noteForm-input-desc {
+    margin-top: 20px;
+}
+
+.noteForm-button {
+    width: 364px;
+    height: 64px;
+    background: #47bdff;
+    border-radius: 6px;
+    border: none;
+    margin: 30px 0;
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #ffffff;
+}
+
+.noteForm-button:hover {
+    cursor: pointer;
+}
+
+.noteForm-button:focus {
+    outline: none;
+}
