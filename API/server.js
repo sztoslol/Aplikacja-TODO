@@ -230,13 +230,19 @@ app.get("/tasks/:login", (req, res) => {
             )`;
             break;
         case "upcoming":
-            const today_upcoming = new Date().toISOString().split("T")[0];
+            const today_upcoming = new Date();
+            today_upcoming.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(
+                today_upcoming.getTime() + 24 * 60 * 60 * 1000
+            );
             const threeDaysFromNow = new Date(
-                Date.now() + 3 * 24 * 60 * 60 * 1000
-            )
+                today_upcoming.getTime() + 3 * 24 * 60 * 60 * 1000
+            );
+            const tomorrowFormatted = tomorrow.toISOString().split("T")[0];
+            const threeDaysFromNowFormatted = threeDaysFromNow
                 .toISOString()
                 .split("T")[0];
-            query += ` AND t.due_date BETWEEN '${today_upcoming}' AND '${threeDaysFromNow}'`;
+            query += ` AND t.due_date > '${tomorrowFormatted}' AND t.due_date <= '${threeDaysFromNowFormatted}'`;
             console.log(query);
             break;
         default:

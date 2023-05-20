@@ -1,44 +1,42 @@
-import "./dashboard.css";
-import Task from "./task/task";
-import Note from "./note/note";
+import { ToastContainer, toast } from "react-toastify";
 import AddTaskForm from "./addTaskForm/addTaskForm";
 import AddNoteForm from "./addNoteForm/addNoteForm";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import Task from "./task/task";
+import Note from "./note/note";
+import Cookies from "js-cookie";
 import { Setting2, LogoutCurve } from "iconsax-react";
 import { useState, useEffect } from "react";
 import { Waveform } from "@uiball/loaders";
-import Cookies from "js-cookie";
+import "react-toastify/dist/ReactToastify.css";
+import "./dashboard.css";
 
 /*
     Obłsuga formularzy(w tym dodanie danych do bazy) znajduje się w ich komponentach
     
     TODO: 
-        X Pliki cookies => token + baza danych
-        -> Naprawa formularzy 
+        -> Pliki cookies => token + baza danych
+        -> Naprawa formularzy
         -> Dodanie edycji zadań
         -> Wstępne testy formularzy ->
             => Logowanie
             => Rejstracja
             => Dodawanie zadań (w trakcie tworzenia)
             => Dodawanie notatek
-        -> Dodać ulubione zadania
         -> Zablokować możlowość loginu `none`
+        -> Naprawić błąd związany z niezapisywaniem do session storage odpowiadnich danych 
         -= Nie uwzględniono dashboard -> dokończyć =-
 */
 
 const Dashboard = ({ onLogOut }) => {
+    const [userLogin, setUserLogin] = useState(Cookies.get("login") || "");
     const [showAddNoteForm, setShowAddNoteForm] = useState(false);
     const [showAddTaskForm, setShowAddTaskForm] = useState(false);
-    const [notes, setNotes] = useState([]);
-    const [tasks, setTasks] = useState([]);
-    const [userLogin, setUserLogin] = useState(() => {
-        return Cookies.get("login") ? Cookies.get("login") : "";
-    });
-    const [userData, setUserData] = useState();
     const [selectedOption, setSelectedOption] = useState("all");
     const [isTasksLoading, setIsTasksLoading] = useState(false);
     const [isNotesLoading, setIsNotesLoading] = useState(false);
+    const [userData, setUserData] = useState();
+    const [notes, setNotes] = useState([]);
+    const [tasks, setTasks] = useState([]);
 
     useEffect(() => {
         fetch(`http://localhost:3010/users/${userLogin}`)
@@ -85,16 +83,8 @@ const Dashboard = ({ onLogOut }) => {
                 });
     }, [showAddTaskForm, userLogin, userData, selectedOption]);
 
-    const handleAddTaskFormChange = () => {
-        setShowAddTaskForm((prev) => {
-            return !prev;
-        });
-    };
-    const handleAddNoteFormChange = () => {
-        setShowAddNoteForm((prev) => {
-            return !prev;
-        });
-    };
+    const handleAddTaskFormChange = () => setShowAddTaskForm((prev) => !prev);
+    const handleAddNoteFormChange = () => setShowAddNoteForm((prev) => !prev);
 
     const handleShowAddTaskForm = () => {
         if (showAddTaskForm === false && showAddNoteForm === false)
@@ -159,6 +149,7 @@ const Dashboard = ({ onLogOut }) => {
 
     return (
         <>
+            <ToastContainer />
             {showAddTaskForm && (
                 <AddTaskForm handleCloseForm={handleCloseForm} />
             )}

@@ -41,12 +41,6 @@ const Task = ({
         const daysDifference = Math.floor(
             timeDifference / (1000 * 60 * 60 * 24)
         );
-        console.log(startDate);
-        console.log(endDate);
-        console.log(startDateObj);
-        console.log(endDateObj);
-        console.log(timeDifference);
-        console.log(daysDifference);
         return daysDifference;
     };
 

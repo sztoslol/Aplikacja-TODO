@@ -129,6 +129,11 @@
     cursor: pointer;
 }
 
+.dashboard-topbar-menu-btn:focus,
+.dashboard-topbar-menu-minibtn:focus {
+    outline: none;
+}
+
 .dashboard-topbar-menu-minibtn {
     width: 64px;
     height: 64px;
@@ -174,9 +179,9 @@
 
 /*==========================Separator=======================*/
 .separator {
-    margin: 0 40px;
+    margin: 28px 38px;
     border: 2px solid rgba(0, 0, 0, 0.08);
-    height: 894px;
+    height: 790px;
 }
 
 /*==========================Notes=======================*/
@@ -199,6 +204,7 @@
     box-sizing: border-box;
     gap: 10px;
     overflow-y: auto;
-    height: 63%;
+    overflow-x: hidden;
+    height: 800px;
     position: relative;
 }

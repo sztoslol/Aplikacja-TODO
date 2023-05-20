@@ -81,7 +81,6 @@
     font-weight: 500;
     font-size: 14px;
     color: #ff0000;
-    display: none;
 }
 
 .dot {
@@ -91,7 +90,6 @@
     background-color: red;
     margin-right: 1px;
     margin-left: 5px;
-    display: none;
 }
 
 .login-input-login {
