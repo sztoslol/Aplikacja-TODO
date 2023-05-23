@@ -307,6 +307,7 @@ app.delete("/notes/:id", (req, res) => {
                         "INSERT INTO note_history (note_id, name, description, created_at) VALUES (?, ?, ?, ?)";
                     const { id, name, description, created_at } = note[0];
                     const values = [id, name, description, created_at];
+                    console.log(values);
                     connection.query(insertHistoryQuery, values, (err) => {
                         if (err) {
                             console.error(

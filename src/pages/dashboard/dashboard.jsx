@@ -34,6 +34,7 @@ const Dashboard = ({ onLogOut }) => {
     const [selectedOption, setSelectedOption] = useState("all");
     const [isTasksLoading, setIsTasksLoading] = useState(false);
     const [isNotesLoading, setIsNotesLoading] = useState(false);
+    const [deletedNoteId, setDeletedNoteId] = useState(null);
     const [userData, setUserData] = useState();
     const [notes, setNotes] = useState([]);
     const [tasks, setTasks] = useState([]);
@@ -62,7 +63,7 @@ const Dashboard = ({ onLogOut }) => {
                 console.error(error);
                 setIsNotesLoading(false);
             });
-    }, [showAddNoteForm]);
+    }, [showAddNoteForm, deletedNoteId]);
 
     useEffect(() => {
         setIsTasksLoading(true);
@@ -138,6 +139,29 @@ const Dashboard = ({ onLogOut }) => {
             })
             .catch((error) => {
                 console.error("Błąd sieci:", error);
+            });
+    };
+
+    const handleDeleteNote = (noteID) => {
+        fetch(`http://localhost:3010/notes/${noteID}`, {
+            method: "DELETE",
+        })
+            .then((response) => {
+                if (response.ok) {
+                    console.log("Notatka została pomyślnie usunięta");
+                    setDeletedNoteId(noteID);
+                } else if (response.status === 404) {
+                    console.log("Notatka nie została znaleziona");
+                } else {
+                    console.log("Wystąpił błąd podczas usuwania notatki");
+                    setDeletedNoteId(noteID);
+                    toast.error("Błąd podczas archwizowania", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Wystąpił błąd sieci:", error);
             });
     };
 
@@ -255,6 +279,7 @@ const Dashboard = ({ onLogOut }) => {
                                         desc={note.description}
                                         date={formatDate(note.created_at)}
                                         id={note.id}
+                                        handleDeleteNote={handleDeleteNote}
                                     />
                                 ))
                             ) : (

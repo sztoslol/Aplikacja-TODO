@@ -1,7 +1,11 @@
 import "./note.css";
 import { Calendar, Trash } from "iconsax-react";
 
-const Note = ({ header, desc, date, id }) => {
+const Note = ({ header, desc, date, id, handleDeleteNote }) => {
+    const onDeleteNote = () => {
+        handleDeleteNote(id);
+    };
+
     return (
         <div className='note-main'>
             <div className='note-header'>{header}</div>
@@ -11,7 +15,10 @@ const Note = ({ header, desc, date, id }) => {
                     <Calendar variant='Bold' />
                     <div className='note-footer-text'>{date}</div>
                 </div>
-                <div className='note-footer-delate'>
+                <div
+                    className='note-footer-delate'
+                    onClick={() => onDeleteNote()}
+                >
                     <Trash variant='Bold' />
                 </div>
             </div>
