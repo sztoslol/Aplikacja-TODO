@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Czas generowania: 16 Maj 2023, 13:45
+-- Czas generowania: 18 Maj 2023, 22:48
 -- Wersja serwera: 10.4.27-MariaDB
 -- Wersja PHP: 8.2.0
 
@@ -39,18 +39,8 @@ CREATE TABLE `notes` (
 --
 
 INSERT INTO `notes` (`id`, `name`, `description`, `created_at`) VALUES
-(1, 'Przykładowa notatka', 'Opis przykładowej notatki, możesz tutaj zapisywać dowolny tekst, który będzie widniał po prawej stronie ekranu', '2023-05-16');
-
---
--- Wyzwalacze `notes`
---
-DELIMITER $$
-CREATE TRIGGER `archive_note` AFTER DELETE ON `notes` FOR EACH ROW BEGIN
-    INSERT INTO note_history (note_id, name, description, created_at)
-    VALUES (OLD.id, OLD.name, OLD.description, OLD.created_at);
-END
-$$
-DELIMITER ;
+(1, 'Przykładowa notatka', 'Opis przykładowej notatki, możesz tutaj zapisywać dowolny tekst, który będzie widniał po prawej stronie ekranu', '2023-05-16'),
+(10, 'Test', 'Test', '2023-05-16');
 
 -- --------------------------------------------------------
 
@@ -76,7 +66,7 @@ CREATE TABLE `tasks` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `due_date` date NOT NULL,
+  `due_date` date NOT NULL DEFAULT current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -86,20 +76,10 @@ CREATE TABLE `tasks` (
 --
 
 INSERT INTO `tasks` (`id`, `name`, `description`, `due_date`, `created_at`, `updated_at`) VALUES
-(1, 'Przykładowe zadanie 1', 'Opis przykładowego zadania 1, które polega na wykonaniu konkretnej czynności w określonym czasie.', '2023-05-18', '2023-05-13 22:45:57', '2023-05-16 09:29:49'),
+(1, 'Przykładowe zadanie 1', 'Opis przykładowego zadania 1, które polega na wykonaniu konkretnej czynności w określonym czasie.', '2023-05-17', '2023-05-13 22:45:57', '2023-05-18 08:32:01'),
 (6, 'Przykładowe zadanie 2', 'Opis przykładowego zadania 2, które polega na wykonaniu konkretnej czynności w określonym czasie.', '2023-07-11', '2023-05-13 22:48:56', '2023-05-16 09:30:18'),
-(7, 'Test', 'Test', '2023-05-19', '2023-05-16 11:05:15', '2023-05-16 11:05:15');
-
---
--- Wyzwalacze `tasks`
---
-DELIMITER $$
-CREATE TRIGGER `archive_task` AFTER DELETE ON `tasks` FOR EACH ROW BEGIN
-    INSERT INTO task_history (task_id, name, description, due_date, created_at, updated_at)
-    VALUES (OLD.id, OLD.name, OLD.description, OLD.due_date, OLD.created_at, OLD.updated_at);
-END
-$$
-DELIMITER ;
+(10, 'Przykładowa nazwa zadania', 'Przykładowy opis zadania', '2023-05-19', '2023-05-17 13:35:08', '2023-05-17 13:35:08'),
+(11, 'Zadanie przypisane do użytkownika', 'Testowe zadanie przypisane do użytkownika 1', '2023-06-13', '2023-05-17 13:38:24', '2023-05-17 13:38:24');
 
 -- --------------------------------------------------------
 
@@ -136,7 +116,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `login`, `password`, `role`) VALUES
 (1, 'Master', '$2a$10$iWmZ6/MJrPwwMafFU0mvUu5NIdm4SXHJ78ra70qwqO5Wh31sul/da', 'admin'),
-(2, 'user', '$2a$10$7ItciXfBp/PpsWNGNvPJm.VrgAna7s1mH3ryahJLN1Bk7p8tbrF/W', 'user');
+(2, 'user', '$2a$10$7ItciXfBp/PpsWNGNvPJm.VrgAna7s1mH3ryahJLN1Bk7p8tbrF/W', 'user'),
+(9, 'user2', '$2a$10$C672.ZzlwU4AGOEV2qGS9eCuXchRWbusgqD7o39jaaTcIVRlr3S/6', 'user');
 
 -- --------------------------------------------------------
 
@@ -146,17 +127,20 @@ INSERT INTO `users` (`id`, `login`, `password`, `role`) VALUES
 
 CREATE TABLE `user_tasks` (
   `user_id` int(11) NOT NULL,
-  `task_id` int(11) NOT NULL
+  `task_id` int(11) NOT NULL,
+  `is_favorite` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Zrzut danych tabeli `user_tasks`
 --
 
-INSERT INTO `user_tasks` (`user_id`, `task_id`) VALUES
-(1, 1),
-(1, 7),
-(2, 6);
+INSERT INTO `user_tasks` (`user_id`, `task_id`, `is_favorite`) VALUES
+(1, 1, 1),
+(1, 10, 1),
+(2, 6, 0),
+(2, 10, 0),
+(2, 11, 0);
 
 --
 -- Indeksy dla zrzutów tabel
@@ -209,31 +193,31 @@ ALTER TABLE `user_tasks`
 -- AUTO_INCREMENT dla tabeli `notes`
 --
 ALTER TABLE `notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT dla tabeli `note_history`
 --
 ALTER TABLE `note_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT dla tabeli `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT dla tabeli `task_history`
 --
 ALTER TABLE `task_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT dla tabeli `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Ograniczenia dla zrzutów tabel

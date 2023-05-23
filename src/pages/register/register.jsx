@@ -134,8 +134,7 @@ const Register = ({ onLogin, isLoggedIn }) => {
             .then((response) => response.json())
             .then((data) => {
                 if (data.exists) {
-                    errorLogin.current.textContent =
-                        "Login zajęty";
+                    errorLogin.current.textContent = "Login zajęty";
                     errorLogin.current.style.display = "block";
                     dotLogin.current.style.display = "block";
                     console.log("User with this login already exists");
@@ -158,20 +157,8 @@ const Register = ({ onLogin, isLoggedIn }) => {
                     console.log("User added successfully");
 
                     if (userData.rememberMe) {
+                        Cookies.set("login", userData.login, { expires: 7 });
                         Cookies.set("isLoggedIn", true, { expires: 7 });
-
-                        Cookies.set(
-                            "user",
-                            JSON.stringify({
-                                login: userData.login,
-                                password: bcrypt.hashSync(
-                                    userData.password,
-                                    10
-                                ),
-                                type: "user",
-                            }),
-                            { expires: 7 }
-                        );
                     }
 
                     onLogin();

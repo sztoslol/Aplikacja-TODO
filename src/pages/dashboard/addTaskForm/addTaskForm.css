@@ -13,7 +13,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-index: 999; 
+    z-index: 999;
 }
 
 .taskForm-header {
@@ -40,6 +40,14 @@
 
 .taskForm-input-taskname {
     margin-top: 30px;
+}
+
+.taskForm-input-taskname-top,
+.taskForm-input-desc-top,
+.datepicker-outer-top,
+.taskForm-dropdown-top {
+    display: flex;
+    justify-content: space-between;
 }
 
 .taskForm-input-taskname-text,
