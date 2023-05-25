@@ -2,20 +2,13 @@ import "./addTaskForm.css";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faCirclePlus } from "@fortawesome/free-solid-svg-icons";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const AddTaskForm = ({ handleCloseForm }) => {
-    const [taskData, setTaskData] = useState({
-        name: "",
-        description: "",
-        due_date: "",
-        target_users: [],
-    });
-
-    const [dropdownVisibility, setdropdownVisibility] = useState("none");
     const [users, setUsers] = useState([]);
+    const [dropdownVisibility, setDropdownVisibility] = useState("none");
 
     useEffect(() => {
         fetch("http://localhost:3010/users")
@@ -23,25 +16,6 @@ const AddTaskForm = ({ handleCloseForm }) => {
             .then((data) => setUsers(data))
             .catch((error) => console.error(error));
     }, []);
-
-    const handleDue_dateInputChange = (date) => {
-        setTaskData((prevState) => ({
-            ...prevState,
-            due_date: date,
-        }));
-    };
-
-    const handleTargetUserClick = (user) => {
-        const { target_users } = taskData;
-        const updatedUsers = target_users.includes(user)
-            ? target_users.filter((u) => u !== user)
-            : [...target_users, user];
-
-        setTaskData((prevTaskData) => ({
-            ...prevTaskData,
-            target_users: updatedUsers,
-        }));
-    };
 
     const handleButtonClick = (values) => {
         fetch("http://localhost:3010/tasks", {
@@ -102,7 +76,7 @@ const AddTaskForm = ({ handleCloseForm }) => {
                     handleButtonClick(values);
                 }}
             >
-                {({ errors, touched }) => (
+                {({ errors, touched, values, setFieldValue }) => (
                     <Form>
                         <div className='taskForm-input-taskname'>
                             <div className='taskForm-input-taskname-top'>
@@ -173,8 +147,10 @@ const AddTaskForm = ({ handleCloseForm }) => {
                                 {({ field }) => (
                                     <ReactDatePicker
                                         {...field}
-                                        selected={taskData.due_date}
-                                        onChange={handleDue_dateInputChange}
+                                        selected={values.due_date}
+                                        onChange={(date) =>
+                                            setFieldValue("due_date", date)
+                                        }
                                         className='datepicker'
                                         dateFormat='yyyy-MM-dd'
                                         placeholderText='Wybierz datę wykonania'
@@ -203,17 +179,17 @@ const AddTaskForm = ({ handleCloseForm }) => {
                             <div
                                 className='taskForm-dropdown-main'
                                 onClick={() =>
-                                    setdropdownVisibility(
+                                    setDropdownVisibility(
                                         dropdownVisibility === "none"
                                             ? "block"
                                             : "none"
                                     )
                                 }
                             >
-                                {taskData.target_users.length <= 0
+                                {values.target_users.length <= 0
                                     ? "Wybierz osoby"
                                     : truncatedText(
-                                          taskData.target_users.join(", ")
+                                          values.target_users.join(", ")
                                       )}
                                 <div className='taskForm-dropdown-main-icon'>
                                     <FontAwesomeIcon icon={faChevronDown} />
@@ -227,17 +203,31 @@ const AddTaskForm = ({ handleCloseForm }) => {
                                     users.map((user) => (
                                         <div
                                             className={`taskForm-dropdown-element ${
-                                                taskData.target_users.includes(
+                                                values.target_users.includes(
                                                     user.login
                                                 )
                                                     ? "selected"
                                                     : ""
                                             }`}
-                                            onClick={() =>
-                                                handleTargetUserClick(
-                                                    user.login
-                                                )
-                                            }
+                                            onClick={() => {
+                                                const targetUsers =
+                                                    values.target_users.includes(
+                                                        user.login
+                                                    )
+                                                        ? values.target_users.filter(
+                                                              (u) =>
+                                                                  u !==
+                                                                  user.login
+                                                          )
+                                                        : [
+                                                              ...values.target_users,
+                                                              user.login,
+                                                          ];
+                                                setFieldValue(
+                                                    "target_users",
+                                                    targetUsers
+                                                );
+                                            }}
                                             key={user.login}
                                         >
                                             {user.login}

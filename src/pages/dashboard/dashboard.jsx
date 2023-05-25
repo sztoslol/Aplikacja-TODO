@@ -17,12 +17,6 @@ import "./dashboard.css";
         -> Pliki cookies => token + baza danych
         -> Naprawa formularzy
         -> Dodanie edycji zadań
-        -> Wstępne testy formularzy ->
-            => Logowanie
-            => Rejstracja
-            => Dodawanie zadań (w trakcie tworzenia)
-            => Dodawanie notatek
-        -> Zablokować możlowość loginu `none`
         -> Naprawić błąd związany z niezapisywaniem do session storage odpowiadnich danych 
         -= Nie uwzględniono dashboard -> dokończyć =-
 */
@@ -35,6 +29,8 @@ const Dashboard = ({ onLogOut }) => {
     const [isTasksLoading, setIsTasksLoading] = useState(false);
     const [isNotesLoading, setIsNotesLoading] = useState(false);
     const [deletedNoteId, setDeletedNoteId] = useState(null);
+    const [deletedTaskId, setDeletedTaskId] = useState(null);
+    const [editDataNote, setEditDataNote] = useState({});
     const [userData, setUserData] = useState();
     const [notes, setNotes] = useState([]);
     const [tasks, setTasks] = useState([]);
@@ -82,7 +78,7 @@ const Dashboard = ({ onLogOut }) => {
                     console.error(error);
                     setIsTasksLoading(false);
                 });
-    }, [showAddTaskForm, userLogin, userData, selectedOption]);
+    }, [showAddTaskForm, userLogin, userData, selectedOption, deletedTaskId]);
 
     const handleAddTaskFormChange = () => setShowAddTaskForm((prev) => !prev);
     const handleAddNoteFormChange = () => setShowAddNoteForm((prev) => !prev);
@@ -100,6 +96,8 @@ const Dashboard = ({ onLogOut }) => {
     const handleCloseForm = () => {
         if (showAddTaskForm === true) handleAddTaskFormChange();
         else if (showAddNoteForm === true) handleAddNoteFormChange();
+
+        setEditDataNote({});
     };
 
     const handleEscKey = (event) => {
@@ -150,8 +148,6 @@ const Dashboard = ({ onLogOut }) => {
                 if (response.ok) {
                     console.log("Notatka została pomyślnie usunięta");
                     setDeletedNoteId(noteID);
-                } else if (response.status === 404) {
-                    console.log("Notatka nie została znaleziona");
                 } else {
                     console.log("Wystąpił błąd podczas usuwania notatki");
                     setDeletedNoteId(noteID);
@@ -163,6 +159,28 @@ const Dashboard = ({ onLogOut }) => {
             .catch((error) => {
                 console.error("Wystąpił błąd sieci:", error);
             });
+    };
+
+    const handleDeleteTask = (taskID) => {
+        fetch(`http://localhost:3010/tasks/${taskID}`, {
+            method: "DELETE",
+        })
+            .then((response) => {
+                if (response.ok) {
+                    console.log("Zadanie zostało pomyślnie uzunięte");
+                    setDeletedTaskId(taskID);
+                } else {
+                    console.log("Wystąpił błąd podczas usuwania zadania");
+                }
+            })
+            .catch((error) => {
+                console.error("Wystąpił błąd sieci: ", error);
+            });
+    };
+
+    const editNote = (data) => {
+        setEditDataNote(data);
+        handleShowAddNoteForm();
     };
 
     const formatDate = (dateString) => {
@@ -178,7 +196,10 @@ const Dashboard = ({ onLogOut }) => {
                 <AddTaskForm handleCloseForm={handleCloseForm} />
             )}
             {showAddNoteForm && (
-                <AddNoteForm handleCloseForm={handleCloseForm} />
+                <AddNoteForm
+                    handleCloseForm={handleCloseForm}
+                    editData={editDataNote}
+                />
             )}
             <div className='dashboard-topbar'>
                 <div className='dashboard-topbar-taskList'>
@@ -254,6 +275,7 @@ const Dashboard = ({ onLogOut }) => {
                                     isFavorite={task.is_favorite}
                                     taskID={task.id}
                                     handleChangeFavorite={handleChangeFavorite}
+                                    handleDeleteTask={handleDeleteTask}
                                 />
                             ))
                         ) : (
@@ -280,6 +302,7 @@ const Dashboard = ({ onLogOut }) => {
                                         date={formatDate(note.created_at)}
                                         id={note.id}
                                         handleDeleteNote={handleDeleteNote}
+                                        handleEditNote={editNote}
                                     />
                                 ))
                             ) : (

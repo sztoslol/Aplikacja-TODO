@@ -11,6 +11,7 @@ const Task = ({
     isFavorite,
     taskID,
     handleChangeFavorite,
+    handleDeleteTask,
 }) => {
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -72,6 +73,10 @@ const Task = ({
         });
     };
 
+    const onDeleteTask = () => {
+        handleDeleteTask(taskID);
+    };
+
     return (
         <div className='task-main'>
             <div className='task-header'>{header}</div>
@@ -117,7 +122,11 @@ const Task = ({
                         )}
                     </div>
                     <div className='task-footer-edit-element'>
-                        <Trash className='edit-icon' variant='Bold' />
+                        <Trash
+                            className='edit-icon'
+                            variant='Bold'
+                            onClick={() => onDeleteTask(taskID)}
+                        />
                     </div>
                     <div className='task-footer-edit-element'>
                         <Edit2 className='edit-icon' variant='Bold' />
