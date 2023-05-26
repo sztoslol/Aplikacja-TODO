@@ -1,13 +1,17 @@
+// Importowanie niezbędnych modułów
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
+
+// Tworzenie instancji aplikacji Express
 const app = express();
 
+// Ustawienie parsera dla żądań z kodowaniem URL
 const bodyParser = require("body-parser");
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Ustawienie nagłówków do obsługi CORS
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
@@ -17,8 +21,10 @@ app.use((req, res, next) => {
     next();
 });
 
+// Ustawienie obsługi CORS
 app.use(cors());
 
+// Tworzenie połączenia z bazą danych MySQL
 const connection = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -26,6 +32,7 @@ const connection = mysql.createConnection({
     database: "todoapp",
 });
 
+// Nawiązywanie połączenia z bazą danych
 connection.connect((err) => {
     if (err) {
         console.error("Error connecting to database:", err);
@@ -34,6 +41,24 @@ connection.connect((err) => {
     }
 });
 
+/**
+ * Uruchamia serwer nasłuchujący na porcie 3010.
+ */
+app.listen(3010, () => {
+    console.log("Server listening on port 3010");
+});
+
+/**
+ * =================================================================================
+ * ===================================== 🅶🅴🆃 ======================================
+ * =================================================================================
+ */
+
+/**
+ * Endpoint zwraca tablice obiektów JSON o polach: {id, login, password, role}
+ *
+ * @returns {object[]} - Tablica zawierająca obiekty reprezentujące użytkowników.
+ */
 app.get("/users", (req, res) => {
     connection.query("SELECT * FROM users", (err, results) => {
         if (err) {
@@ -45,6 +70,15 @@ app.get("/users", (req, res) => {
     });
 });
 
+/**
+ * Endpoint zwraca obiekt JSON o polach: {exists, user}.
+ * Jeśli użytkownik o podanym loginie istnieje, pole exists będzie równa true,
+ * a pole user zawiera informacje o użytkowniku z bazy danych.
+ * W przeciwnym razie, pole exists będzie równa false.
+ *
+ * @param {string} req.params.login - Login użytkownika.
+ * @returns {object} - Obiekt JSON zawierający wyniki zapytania do bazy danych.
+ */
 app.get("/users/:login", (req, res) => {
     const login = req.params.login;
 
@@ -68,6 +102,151 @@ app.get("/users/:login", (req, res) => {
     );
 });
 
+/**
+ * Endpoint zwraca tablice obiektów JSON o polach: {id, name, description, created_at}
+ *
+ * @returns {object[]} - Tablica zawierająca obiekty reprezentujące notatki.
+ */
+app.get("/notes", (req, res) => {
+    connection.query("SELECT * FROM notes", (err, results) => {
+        if (err) {
+            console.error("Error querying database:", err);
+            res.status(500).send("Error querying database");
+        } else {
+            res.json(results);
+        }
+    });
+});
+
+/**
+ * Endpoint zwraca tablice obiektów JSON o polach: {id, name, description, due_date, created_at, updated_at}
+ *
+ * @returns {object[]} - Tablica zawierająca obiekty reprezentujące zadania.
+ */
+app.get("/tasks", (req, res) => {
+    connection.query("SELECT * FROM tasks", (err, results) => {
+        if (err) {
+            console.error("Error querying database:", err);
+            res.status(500).send("Error querying database");
+        } else {
+            res.json(results);
+        }
+    });
+});
+
+/**
+ * Pobiera zadania przypisane do określonego użytkownika.
+ *
+ * @param {string} req.params.login - Login użytkownika.
+ * @param {string} req.query.filter - Opcjonalny parametr filtrujący: "saved" (zapisane), "completed" (ukończone), "upcoming" (nadchodzące).
+ */
+app.get("/tasks/:login", (req, res) => {
+    const login = req.params.login;
+    const filter = req.query.filter;
+
+    let query = `
+        SELECT t.*, ut.is_favorite
+        FROM tasks t
+        INNER JOIN user_tasks ut ON t.id = ut.task_id
+        INNER JOIN users u ON u.id = ut.user_id
+        WHERE u.login = ?`;
+
+    switch (filter) {
+        case "saved":
+            // Warunek dla filtru "saved" - zwraca tylko zapisane zadania użytkownika
+            query += `
+            AND t.id IN (
+                SELECT task_id
+                FROM user_tasks
+                WHERE user_id = (
+                    SELECT id
+                    FROM users
+                    WHERE login = ?
+                )
+                AND is_favorite = 1
+            )`;
+            break;
+        case "completed":
+            const today = new Date().toISOString().split("T")[0];
+            // Warunek dla filtru "completed" - zwraca tylko ukończone zadania do dzisiejszej daty
+            query += `
+            AND t.id IN (
+                SELECT id
+                FROM tasks
+                WHERE id = t.id
+                AND due_date <= '${today}'
+            )`;
+            break;
+        case "upcoming":
+            const today_upcoming = new Date();
+            today_upcoming.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(
+                today_upcoming.getTime() + 24 * 60 * 60 * 1000
+            );
+            const threeDaysFromNow = new Date(
+                today_upcoming.getTime() + 3 * 24 * 60 * 60 * 1000
+            );
+            const tomorrowFormatted = tomorrow.toISOString().split("T")[0];
+            const threeDaysFromNowFormatted = threeDaysFromNow
+                .toISOString()
+                .split("T")[0];
+            // Warunek dla filtru "upcoming" - zwraca tylko nadchodzące zadania od jutra do trzech dni w przód
+            query += ` AND t.due_date > '${tomorrowFormatted}' AND t.due_date <= '${threeDaysFromNowFormatted}'`;
+            break;
+        default:
+            break;
+    }
+
+    connection.query(query, [login, login], (err, results) => {
+        if (err) {
+            console.error("Error querying database:", err);
+            res.status(500).send("Error querying database");
+        } else {
+            res.json(results);
+        }
+    });
+});
+
+/**
+ * Endpoint zwraca listę użytkowników przypisanych do zadania o podanym identyfikatorze.
+ *
+ * @param {string} req.params.id - Identyfikator zadania.
+ * @returns {object} - Obiekt JSON z listą użytkowników przypisanych do zadania lub błąd.
+ */
+app.get("/tasks/:id/users", (req, res) => {
+    const taskId = req.params.id;
+
+    const getUsersQuery = `
+        SELECT users.login
+        FROM users
+        JOIN user_tasks ON users.id = user_tasks.user_id
+        WHERE user_tasks.task_id = ?
+    `;
+
+    connection.query(getUsersQuery, [taskId], (err, results) => {
+        if (err) {
+            console.error("Error retrieving users:", err);
+            res.status(500).send("Error retrieving users");
+        } else {
+            console.log(results);
+            const users = results.map((user) => user.login);
+            res.status(200).json(users);
+        }
+    });
+});
+
+/**
+ * ================================================================================
+ * ==================================== 🅟🅞🅢🅣 ====================================
+ * ================================================================================
+ */
+
+/**
+ * Endpoint dodaje nowego użytkownika do bazy danych.
+ *
+ * @param {string} req.body.login - Login nowego użytkownika.
+ * @param {string} req.body.password - Hasło nowego użytkownika.
+ */
 app.post("/users", (req, res) => {
     const { login, password } = req.body;
     connection.query(
@@ -85,17 +264,12 @@ app.post("/users", (req, res) => {
     );
 });
 
-app.get("/notes", (req, res) => {
-    connection.query("SELECT * FROM notes", (err, results) => {
-        if (err) {
-            console.error("Error querying database:", err);
-            res.status(500).send("Error querying database");
-        } else {
-            res.json(results);
-        }
-    });
-});
-
+/**
+ * Dodaje nową notatkę do bazy danych.
+ *
+ * @param {string} req.body.name - Nazwa notatki.
+ * @param {string} req.body.description - Opis notatki.
+ */
 app.post("/notes", (req, res) => {
     const { name, description } = req.body;
     connection.query(
@@ -113,19 +287,18 @@ app.post("/notes", (req, res) => {
     );
 });
 
-app.get("/tasks", (req, res) => {
-    connection.query("SELECT * FROM tasks", (err, results) => {
-        if (err) {
-            console.error("Error querying database:", err);
-            res.status(500).send("Error querying database");
-        } else {
-            res.json(results);
-        }
-    });
-});
-
+/**
+ * Dodaje nowe zadanie do bazy danych.
+ *
+ * @param {string} req.body.name - Nazwa zadania.
+ * @param {string} req.body.description - Opis zadania.
+ * @param {string} req.body.due_date - Data terminu zadania w formacie "YYYY-MM-DD".
+ * @param {Array<string>} req.body.target_users - Tablica zawierająca loginy użytkowników, do których przypisane jest zadanie.
+ */
 app.post("/tasks", (req, res) => {
     const { name, description, due_date, target_users } = req.body;
+
+    // Formatowanie daty terminu zadania
     const formattedDueDate = new Date(due_date);
     const year = formattedDueDate.getFullYear();
     const month = String(formattedDueDate.getMonth() + 1).padStart(2, "0");
@@ -133,7 +306,9 @@ app.post("/tasks", (req, res) => {
 
     const formattedDate = `${year}-${month}-${day}`;
 
+    // Zapytanie wstawiające zadanie do bazy danych
     const taskQuery = `INSERT INTO tasks (name, description, due_date) VALUES (?, ?, ?)`;
+
     connection.query(
         taskQuery,
         [name, description, formattedDate],
@@ -144,6 +319,7 @@ app.post("/tasks", (req, res) => {
             } else {
                 const taskId = taskResults.insertId;
 
+                // Zapytanie pobierające identyfikatory użytkowników
                 const userIdsQuery = `SELECT id FROM users WHERE login IN (?)`;
                 connection.query(
                     userIdsQuery,
@@ -156,10 +332,12 @@ app.post("/tasks", (req, res) => {
                             );
                             res.status(500).send("Error retrieving user IDs");
                         } else {
+                            // Tworzenie wartości dla tabeli user_tasks
                             const userTaskValues = userIdsResults.map(
                                 ({ id }) => [id, taskId]
                             );
 
+                            // Zapytanie wstawiające relacje między użytkownikami a zadaniem
                             const userTasksQuery = `INSERT INTO user_tasks (user_id, task_id) VALUES ?`;
                             connection.query(
                                 userTasksQuery,
@@ -189,70 +367,17 @@ app.post("/tasks", (req, res) => {
     );
 });
 
-app.get("/tasks/:login", (req, res) => {
-    const login = req.params.login;
-    const filter = req.query.filter;
+/**
+ * ================================================================================
+ * ===================================== 🅟🅤🅣 =====================================
+ * ================================================================================
+ */
 
-    let query = `
-        SELECT t.*, ut.is_favorite
-        FROM tasks t
-        INNER JOIN user_tasks ut ON t.id = ut.task_id
-        INNER JOIN users u ON u.id = ut.user_id
-        WHERE u.login = ?`;
-
-    switch (filter) {
-        case "saved":
-            query += `
-            AND t.id IN (
-                SELECT task_id
-                FROM user_tasks
-                WHERE user_id = (
-                    SELECT id
-                    FROM users
-                    WHERE login = ?
-                )
-                AND is_favorite = 1
-            )`;
-            break;
-        case "completed":
-            const today = new Date().toISOString().split("T")[0];
-            query += `
-            AND t.id IN (
-                SELECT id
-                FROM tasks
-                WHERE id = t.id
-                AND due_date <= '${today}'
-            )`;
-            break;
-        case "upcoming":
-            const today_upcoming = new Date();
-            today_upcoming.setHours(0, 0, 0, 0);
-            const tomorrow = new Date(
-                today_upcoming.getTime() + 24 * 60 * 60 * 1000
-            );
-            const threeDaysFromNow = new Date(
-                today_upcoming.getTime() + 3 * 24 * 60 * 60 * 1000
-            );
-            const tomorrowFormatted = tomorrow.toISOString().split("T")[0];
-            const threeDaysFromNowFormatted = threeDaysFromNow
-                .toISOString()
-                .split("T")[0];
-            query += ` AND t.due_date > '${tomorrowFormatted}' AND t.due_date <= '${threeDaysFromNowFormatted}'`;
-            break;
-        default:
-            break;
-    }
-
-    connection.query(query, [login, login], (err, results) => {
-        if (err) {
-            console.error("Error querying database:", err);
-            res.status(500).send("Error querying database");
-        } else {
-            res.json(results);
-        }
-    });
-});
-
+/**
+ * Aktualizuje status ulubionego zadania dla użytkownika.
+ *
+ * @returns {Object} Odpowiedź z kodem stanu 200 w przypadku powodzenia.
+ */
 app.put("/tasks/favorite", (req, res) => {
     const taskId = req.body.taskId;
     const userId = req.body.userId;
@@ -275,42 +400,14 @@ app.put("/tasks/favorite", (req, res) => {
     });
 });
 
-app.delete("/tasks/:id", (req, res) => {
-    const taskId = req.params.id;
-
-    const deleteTaskQuery = "DELETE FROM tasks WHERE id = ?";
-    connection.query(deleteTaskQuery, [taskId], (err, result) => {
-        if (err) {
-            console.error("Error deleting task:", err);
-            res.status(500).send("Error deleting task");
-        } else {
-            if (result.affectedRows === 0) {
-                res.status(404).send("Task not found");
-            } else {
-                res.sendStatus(200);
-            }
-        }
-    });
-});
-
-app.delete("/notes/:id", (req, res) => {
-    const noteId = req.params.id;
-
-    const deleteNoteQuery = "DELETE FROM notes WHERE id = ?";
-    connection.query(deleteNoteQuery, [noteId], (err, result) => {
-        if (err) {
-            console.error("Error deleting note:", err);
-            res.status(500).send("Error deleting note");
-        } else {
-            if (result.affectedRows === 0) {
-                res.status(404).send("Note not found");
-            } else {
-                res.sendStatus(200);
-            }
-        }
-    });
-});
-
+/**
+ * Endpoint aktualizuje notatkę o podanym identyfikatorze.
+ *
+ * @param {string} req.params.id - Identyfikator notatki.
+ * @param {string} req.body.name - Nowa nazwa notatki.
+ * @param {string} req.body.description - Nowy opis notatki.
+ * @returns {object} - Obiekt JSON z odpowiedzią.
+ */
 app.put("/notes/:id", (req, res) => {
     const noteId = req.params.id;
     const { name, description } = req.body;
@@ -335,6 +432,16 @@ app.put("/notes/:id", (req, res) => {
     );
 });
 
+/**
+ * Endpoint aktualizuje zadanie o podanym identyfikatorze.
+ *
+ * @param {string} req.params.id - Identyfikator zadania.
+ * @param {string} req.body.name - Nowa nazwa zadania.
+ * @param {string} req.body.description - Nowy opis zadania.
+ * @param {string} req.body.due_date - Nowa data do wykonania zadania.
+ * @param {Array<string>} req.body.target_users - Tablica użytkowników do aktualizacji.
+ * @returns {object} - Obiekt JSON z odpowiedzią.
+ */
 app.put("/tasks/:id", (req, res) => {
     const taskId = req.params.id;
     const { name, description, due_date, target_users } = req.body;
@@ -422,31 +529,56 @@ app.put("/tasks/:id", (req, res) => {
     );
 });
 
-app.get("/tasks/:id/users", (req, res) => {
+/**
+ * =================================================================================
+ * =================================== 🅳🅴🅻🅴🆃🅴 ===================================
+ * =================================================================================
+ */
+
+/**
+ * Endpoint usuwa zadanie o podanym identyfikatorze.
+ *
+ * @param {string} req.params.id - Identyfikator zadania.
+ * @returns {object} - Obiekt JSON z odpowiedzią.
+ */
+app.delete("/tasks/:id", (req, res) => {
     const taskId = req.params.id;
 
-    const getUsersQuery = `
-        SELECT users.id, users.login
-        FROM users
-        JOIN user_tasks ON users.id = user_tasks.user_id
-        WHERE user_tasks.task_id = ?
-    `;
-
-    connection.query(getUsersQuery, [taskId], (err, results) => {
+    const deleteTaskQuery = "DELETE FROM tasks WHERE id = ?";
+    connection.query(deleteTaskQuery, [taskId], (err, result) => {
         if (err) {
-            console.error("Error retrieving users:", err);
-            res.status(500).send("Error retrieving users");
+            console.error("Error deleting task:", err);
+            res.status(500).send("Error deleting task");
         } else {
-            console.log(results);
-            const users = results.map((user) => ({
-                id: user.id,
-                login: user.login,
-            }));
-            res.status(200).json(users);
+            if (result.affectedRows === 0) {
+                res.status(404).send("Task not found");
+            } else {
+                res.sendStatus(200);
+            }
         }
     });
 });
 
-app.listen(3010, () => {
-    console.log("Server listening on port 3010");
+/**
+ * Endpoint usuwa notatkę o podanym identyfikatorze.
+ *
+ * @param {string} req.params.id - Identyfikator notatki.
+ * @returns {object} - Obiekt JSON z odpowiedzią.
+ */
+app.delete("/notes/:id", (req, res) => {
+    const noteId = req.params.id;
+
+    const deleteNoteQuery = "DELETE FROM notes WHERE id = ?";
+    connection.query(deleteNoteQuery, [noteId], (err, result) => {
+        if (err) {
+            console.error("Error deleting note:", err);
+            res.status(500).send("Error deleting note");
+        } else {
+            if (result.affectedRows === 0) {
+                res.status(404).send("Note not found");
+            } else {
+                res.sendStatus(200);
+            }
+        }
+    });
 });

@@ -9,23 +9,31 @@ import "react-datepicker/dist/react-datepicker.css";
 const AddTaskForm = ({ handleCloseForm, editData }) => {
     const [users, setUsers] = useState([]);
     const [dropdownVisibility, setDropdownVisibility] = useState("none");
-    const [editUsers, setEditUsers] = useState([]);
+    const [EditData, setEditData] = useState([]);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
         fetch("http://localhost:3010/users")
             .then((response) => response.json())
-            .then((data) => setUsers(data))
+            .then((data) => {
+                setUsers(data);
+
+                if (Object.keys(editData).length > 0) {
+                    fetch(`http://localhost:3010/tasks/${editData.id}/users`)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            setEditData({ ...editData, target_users: data });
+                            setIsLoaded(true);
+                        })
+                        .catch((error) => console.error(error));
+                } else {
+                    setIsLoaded(true);
+                }
+            })
             .catch((error) => console.error(error));
-        Object.keys(editData).length > 0 &&
-            fetch(`http://localhost:3010/tasks/${editData.id}/users`)
-                .then((response) => response.json())
-                .then((data) => setEditUsers(data))
-                .catch((error) => console.error(error));
-    }, []);
+    }, [editData]);
 
-    console.log(editUsers);
-
-    const handleButtonClick = (values) => {
+    const handleAddTask = (values) => {
         fetch("http://localhost:3010/tasks", {
             method: "POST",
             headers: {
@@ -45,25 +53,54 @@ const AddTaskForm = ({ handleCloseForm, editData }) => {
             });
     };
 
+    const handleEditTask = (values) => {
+        fetch(`http://localhost:3010/tasks/${editData.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(values),
+        })
+            .then((response) => {
+                if (response.ok) {
+                    console.log("Zadanie zostało zaktualizowane.");
+                    handleCloseForm();
+                } else if (response.status === 404) {
+                    console.log("Nie znaleziono zadania o podanym ID.");
+                } else {
+                    console.log("Wystąpił błąd podczas aktualizacji zadania.");
+                }
+            })
+            .catch((error) => {
+                console.error("Wystąpił błąd sieci:", error);
+            });
+    };
+
     const truncatedText = (text) => {
         return text.length > 30 ? text.slice(0, 30) + "..." : text;
     };
+
+    if (!isLoaded) {
+        return null;
+    }
 
     return (
         <div className='taskForm-main'>
             <div className='taskForm-header'>Zadanie</div>
             <div className='taskForm-subheader'>
-                {Object.keys(editData).length > 1
+                {Object.keys(editData).length > 0
                     ? "Aby edytować zadanie wypełnij pola poniżej"
                     : "Aby dodać zadanie wypełnij pola poniżej"}
             </div>
 
             <Formik
                 initialValues={{
-                    name: "",
-                    description: "",
-                    due_date: null,
-                    target_users: [],
+                    name: EditData.name || "",
+                    description: EditData.description || "",
+                    due_date: EditData.due_date
+                        ? new Date(EditData.due_date)
+                        : null,
+                    target_users: EditData.target_users || [],
                 }}
                 validate={(values) => {
                     const errors = {};
@@ -83,7 +120,9 @@ const AddTaskForm = ({ handleCloseForm, editData }) => {
                     return errors;
                 }}
                 onSubmit={(values) => {
-                    handleButtonClick(values);
+                    Object.keys(editData).length > 0
+                        ? handleEditTask(values)
+                        : handleAddTask(values);
                 }}
             >
                 {({ errors, touched, values, setFieldValue }) => (

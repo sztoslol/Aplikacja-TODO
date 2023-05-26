@@ -79,7 +79,7 @@
     display: flex;
     justify-content: space-between;
     align-self: flex-end;
-    width: 88px;
+    gap: 15px;
 }
 
 .edit-icon {
