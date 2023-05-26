@@ -194,17 +194,12 @@ app.get("/tasks/:login", (req, res) => {
     const filter = req.query.filter;
 
     let query = `
-      SELECT t.*, ut.is_favorite
-      FROM tasks t
-      INNER JOIN user_tasks ut ON t.id = ut.task_id
-      INNER JOIN users u ON u.id = ut.user_id`;
+        SELECT t.*, ut.is_favorite
+        FROM tasks t
+        INNER JOIN user_tasks ut ON t.id = ut.task_id
+        INNER JOIN users u ON u.id = ut.user_id
+        WHERE u.login = ?`;
 
-    if (login !== "none") {
-        query += `
-          WHERE u.login = ?`;
-    }
-
-    console.log(query);
     switch (filter) {
         case "saved":
             query += `
@@ -243,10 +238,8 @@ app.get("/tasks/:login", (req, res) => {
                 .toISOString()
                 .split("T")[0];
             query += ` AND t.due_date > '${tomorrowFormatted}' AND t.due_date <= '${threeDaysFromNowFormatted}'`;
-            console.log(query);
             break;
         default:
-            console.log(query);
             break;
     }
 
@@ -255,7 +248,6 @@ app.get("/tasks/:login", (req, res) => {
             console.error("Error querying database:", err);
             res.status(500).send("Error querying database");
         } else {
-            console.log(results);
             res.json(results);
         }
     });
@@ -283,46 +275,174 @@ app.put("/tasks/favorite", (req, res) => {
     });
 });
 
+app.delete("/tasks/:id", (req, res) => {
+    const taskId = req.params.id;
+
+    const deleteTaskQuery = "DELETE FROM tasks WHERE id = ?";
+    connection.query(deleteTaskQuery, [taskId], (err, result) => {
+        if (err) {
+            console.error("Error deleting task:", err);
+            res.status(500).send("Error deleting task");
+        } else {
+            if (result.affectedRows === 0) {
+                res.status(404).send("Task not found");
+            } else {
+                res.sendStatus(200);
+            }
+        }
+    });
+});
+
 app.delete("/notes/:id", (req, res) => {
     const noteId = req.params.id;
 
-    const selectNoteQuery = "SELECT * FROM notes WHERE id = ?";
-    connection.query(selectNoteQuery, [noteId], (err, note) => {
+    const deleteNoteQuery = "DELETE FROM notes WHERE id = ?";
+    connection.query(deleteNoteQuery, [noteId], (err, result) => {
         if (err) {
-            console.error("Error querying database:", err);
-            res.status(500).send("Error querying database");
+            console.error("Error deleting note:", err);
+            res.status(500).send("Error deleting note");
         } else {
-            if (note.length === 0) {
+            if (result.affectedRows === 0) {
                 res.status(404).send("Note not found");
-                return;
+            } else {
+                res.sendStatus(200);
             }
+        }
+    });
+});
 
-            const deleteNoteQuery = "DELETE FROM notes WHERE id = ?";
-            connection.query(deleteNoteQuery, [noteId], (err) => {
-                if (err) {
-                    console.error("Error deleting note:", err);
-                    res.status(500).send("Error deleting note");
+app.put("/notes/:id", (req, res) => {
+    const noteId = req.params.id;
+    const { name, description } = req.body;
+
+    const updateNoteQuery =
+        "UPDATE notes SET name = ?, description = ? WHERE id = ?";
+    connection.query(
+        updateNoteQuery,
+        [name, description, noteId],
+        (err, result) => {
+            if (err) {
+                console.error("Error updating note:", err);
+                res.status(500).send("Error updating note");
+            } else {
+                if (result.affectedRows === 0) {
+                    res.status(404).send("Note not found");
                 } else {
-                    const insertHistoryQuery =
-                        "INSERT INTO note_history (note_id, name, description, created_at) VALUES (?, ?, ?, ?)";
-                    const { id, name, description, created_at } = note[0];
-                    const values = [id, name, description, created_at];
-                    console.log(values);
-                    connection.query(insertHistoryQuery, values, (err) => {
-                        if (err) {
+                    res.sendStatus(200);
+                }
+            }
+        }
+    );
+});
+
+app.put("/tasks/:id", (req, res) => {
+    const taskId = req.params.id;
+    const { name, description, due_date, target_users } = req.body;
+    const formattedDueDate = new Date(due_date);
+    const year = formattedDueDate.getFullYear();
+    const month = String(formattedDueDate.getMonth() + 1).padStart(2, "0");
+    const day = String(formattedDueDate.getDate()).padStart(2, "0");
+
+    const formattedDate = `${year}-${month}-${day}`;
+
+    const updateTaskQuery = `UPDATE tasks SET name = ?, description = ?, due_date = ? WHERE id = ?`;
+    connection.query(
+        updateTaskQuery,
+        [name, description, formattedDate, taskId],
+        (updateTaskErr, updateTaskResults) => {
+            if (updateTaskErr) {
+                console.error("Error updating task:", updateTaskErr);
+                res.status(500).send("Error updating task");
+            } else {
+                const deletePreviousUsersQuery = `DELETE FROM user_tasks WHERE task_id = ?`;
+                connection.query(
+                    deletePreviousUsersQuery,
+                    [taskId],
+                    (deleteUsersErr) => {
+                        if (deleteUsersErr) {
                             console.error(
-                                "Error inserting note into history:",
-                                err
+                                "Error deleting previous user-task relationships:",
+                                deleteUsersErr
                             );
                             res.status(500).send(
-                                "Error inserting note into history"
+                                "Error deleting previous user-task relationships"
                             );
                         } else {
-                            res.sendStatus(200);
+                            const userIdsQuery = `SELECT id FROM users WHERE login IN (?)`;
+                            connection.query(
+                                userIdsQuery,
+                                [target_users],
+                                (userIdsErr, userIdsResults) => {
+                                    if (userIdsErr) {
+                                        console.error(
+                                            "Error retrieving user IDs:",
+                                            userIdsErr
+                                        );
+                                        res.status(500).send(
+                                            "Error retrieving user IDs"
+                                        );
+                                    } else {
+                                        const userTaskValues =
+                                            userIdsResults.map(({ id }) => [
+                                                id,
+                                                taskId,
+                                            ]);
+
+                                        const insertUserTasksQuery = `INSERT INTO user_tasks (user_id, task_id) VALUES ?`;
+                                        connection.query(
+                                            insertUserTasksQuery,
+                                            [userTaskValues],
+                                            (insertUserTasksErr) => {
+                                                if (insertUserTasksErr) {
+                                                    console.error(
+                                                        "Error inserting user-task relationships:",
+                                                        insertUserTasksErr
+                                                    );
+                                                    res.status(500).send(
+                                                        "Error inserting user-task relationships"
+                                                    );
+                                                } else {
+                                                    console.log(
+                                                        "Task updated successfully"
+                                                    );
+                                                    res.status(200).send(
+                                                        "Task updated successfully"
+                                                    );
+                                                }
+                                            }
+                                        );
+                                    }
+                                }
+                            );
                         }
-                    });
-                }
-            });
+                    }
+                );
+            }
+        }
+    );
+});
+
+app.get("/tasks/:id/users", (req, res) => {
+    const taskId = req.params.id;
+
+    const getUsersQuery = `
+        SELECT users.id, users.login
+        FROM users
+        JOIN user_tasks ON users.id = user_tasks.user_id
+        WHERE user_tasks.task_id = ?
+    `;
+
+    connection.query(getUsersQuery, [taskId], (err, results) => {
+        if (err) {
+            console.error("Error retrieving users:", err);
+            res.status(500).send("Error retrieving users");
+        } else {
+            console.log(results);
+            const users = results.map((user) => ({
+                id: user.id,
+                login: user.login,
+            }));
+            res.status(200).json(users);
         }
     });
 });
