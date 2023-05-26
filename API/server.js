@@ -335,6 +335,118 @@ app.put("/notes/:id", (req, res) => {
     );
 });
 
+app.put("/tasks/:id", (req, res) => {
+    const taskId = req.params.id;
+    const { name, description, due_date, target_users } = req.body;
+    const formattedDueDate = new Date(due_date);
+    const year = formattedDueDate.getFullYear();
+    const month = String(formattedDueDate.getMonth() + 1).padStart(2, "0");
+    const day = String(formattedDueDate.getDate()).padStart(2, "0");
+
+    const formattedDate = `${year}-${month}-${day}`;
+
+    const updateTaskQuery = `UPDATE tasks SET name = ?, description = ?, due_date = ? WHERE id = ?`;
+    connection.query(
+        updateTaskQuery,
+        [name, description, formattedDate, taskId],
+        (updateTaskErr, updateTaskResults) => {
+            if (updateTaskErr) {
+                console.error("Error updating task:", updateTaskErr);
+                res.status(500).send("Error updating task");
+            } else {
+                const deletePreviousUsersQuery = `DELETE FROM user_tasks WHERE task_id = ?`;
+                connection.query(
+                    deletePreviousUsersQuery,
+                    [taskId],
+                    (deleteUsersErr) => {
+                        if (deleteUsersErr) {
+                            console.error(
+                                "Error deleting previous user-task relationships:",
+                                deleteUsersErr
+                            );
+                            res.status(500).send(
+                                "Error deleting previous user-task relationships"
+                            );
+                        } else {
+                            const userIdsQuery = `SELECT id FROM users WHERE login IN (?)`;
+                            connection.query(
+                                userIdsQuery,
+                                [target_users],
+                                (userIdsErr, userIdsResults) => {
+                                    if (userIdsErr) {
+                                        console.error(
+                                            "Error retrieving user IDs:",
+                                            userIdsErr
+                                        );
+                                        res.status(500).send(
+                                            "Error retrieving user IDs"
+                                        );
+                                    } else {
+                                        const userTaskValues =
+                                            userIdsResults.map(({ id }) => [
+                                                id,
+                                                taskId,
+                                            ]);
+
+                                        const insertUserTasksQuery = `INSERT INTO user_tasks (user_id, task_id) VALUES ?`;
+                                        connection.query(
+                                            insertUserTasksQuery,
+                                            [userTaskValues],
+                                            (insertUserTasksErr) => {
+                                                if (insertUserTasksErr) {
+                                                    console.error(
+                                                        "Error inserting user-task relationships:",
+                                                        insertUserTasksErr
+                                                    );
+                                                    res.status(500).send(
+                                                        "Error inserting user-task relationships"
+                                                    );
+                                                } else {
+                                                    console.log(
+                                                        "Task updated successfully"
+                                                    );
+                                                    res.status(200).send(
+                                                        "Task updated successfully"
+                                                    );
+                                                }
+                                            }
+                                        );
+                                    }
+                                }
+                            );
+                        }
+                    }
+                );
+            }
+        }
+    );
+});
+
+app.get("/tasks/:id/users", (req, res) => {
+    const taskId = req.params.id;
+
+    const getUsersQuery = `
+        SELECT users.id, users.login
+        FROM users
+        JOIN user_tasks ON users.id = user_tasks.user_id
+        WHERE user_tasks.task_id = ?
+    `;
+
+    connection.query(getUsersQuery, [taskId], (err, results) => {
+        if (err) {
+            console.error("Error retrieving users:", err);
+            res.status(500).send("Error retrieving users");
+        } else {
+            console.log(results);
+            const users = results.map((user) => ({
+                id: user.id,
+                login: user.login,
+            }));
+            res.status(200).json(users);
+        }
+    });
+});
+
 app.listen(3010, () => {
     console.log("Server listening on port 3010");
 });

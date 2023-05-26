@@ -6,16 +6,24 @@ import { useEffect, useState } from "react";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const AddTaskForm = ({ handleCloseForm }) => {
+const AddTaskForm = ({ handleCloseForm, editData }) => {
     const [users, setUsers] = useState([]);
     const [dropdownVisibility, setDropdownVisibility] = useState("none");
+    const [editUsers, setEditUsers] = useState([]);
 
     useEffect(() => {
         fetch("http://localhost:3010/users")
             .then((response) => response.json())
             .then((data) => setUsers(data))
             .catch((error) => console.error(error));
+        Object.keys(editData).length > 0 &&
+            fetch(`http://localhost:3010/tasks/${editData.id}/users`)
+                .then((response) => response.json())
+                .then((data) => setEditUsers(data))
+                .catch((error) => console.error(error));
     }, []);
+
+    console.log(editUsers);
 
     const handleButtonClick = (values) => {
         fetch("http://localhost:3010/tasks", {
@@ -45,7 +53,9 @@ const AddTaskForm = ({ handleCloseForm }) => {
         <div className='taskForm-main'>
             <div className='taskForm-header'>Zadanie</div>
             <div className='taskForm-subheader'>
-                Aby dodać zadanie wypełnij pola poniżej
+                {Object.keys(editData).length > 1
+                    ? "Aby edytować zadanie wypełnij pola poniżej"
+                    : "Aby dodać zadanie wypełnij pola poniżej"}
             </div>
 
             <Formik

@@ -31,6 +31,7 @@ const Dashboard = ({ onLogOut }) => {
     const [deletedNoteId, setDeletedNoteId] = useState(null);
     const [deletedTaskId, setDeletedTaskId] = useState(null);
     const [editDataNote, setEditDataNote] = useState({});
+    const [editDataTask, setEditDataTask] = useState({});
     const [userData, setUserData] = useState();
     const [notes, setNotes] = useState([]);
     const [tasks, setTasks] = useState([]);
@@ -183,6 +184,11 @@ const Dashboard = ({ onLogOut }) => {
         handleShowAddNoteForm();
     };
 
+    const editTask = (data) => {
+        setEditDataTask(data);
+        handleShowAddTaskForm();
+    };
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const options = { day: "numeric", month: "long" };
@@ -193,7 +199,10 @@ const Dashboard = ({ onLogOut }) => {
         <>
             <ToastContainer />
             {showAddTaskForm && (
-                <AddTaskForm handleCloseForm={handleCloseForm} />
+                <AddTaskForm
+                    handleCloseForm={handleCloseForm}
+                    editData={editDataTask}
+                />
             )}
             {showAddNoteForm && (
                 <AddNoteForm
@@ -276,6 +285,7 @@ const Dashboard = ({ onLogOut }) => {
                                     taskID={task.id}
                                     handleChangeFavorite={handleChangeFavorite}
                                     handleDeleteTask={handleDeleteTask}
+                                    handleEditTask={editTask}
                                 />
                             ))
                         ) : (
