@@ -10,12 +10,13 @@ import { useState } from "react";
 import "./task.css";
 
 const Task = ({
+    taskID,
     header,
     desc,
     dueDate,
     createdAt,
+    userRole,
     isFavorite,
-    taskID,
     handleChangeFavorite,
     handleDeleteTask,
     handleEditTask,
@@ -100,20 +101,24 @@ const Task = ({
                             />
                         )}
                     </div>
-                    <div className='task-footer-edit-element'>
-                        <Trash
-                            className='edit-icon'
-                            variant='Bold'
-                            onClick={() => onDeleteTask(taskID)}
-                        />
-                    </div>
-                    <div className='task-footer-edit-element'>
-                        <Edit2
-                            className='edit-icon'
-                            variant='Bold'
-                            onClick={() => onEditTask()}
-                        />
-                    </div>
+                    {userRole === "admin" && (
+                        <>
+                            <div className='task-footer-edit-element'>
+                                <Trash
+                                    className='edit-icon'
+                                    variant='Bold'
+                                    onClick={() => onDeleteTask(taskID)}
+                                />
+                            </div>
+                            <div className='task-footer-edit-element'>
+                                <Edit2
+                                    className='edit-icon'
+                                    variant='Bold'
+                                    onClick={() => onEditTask()}
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

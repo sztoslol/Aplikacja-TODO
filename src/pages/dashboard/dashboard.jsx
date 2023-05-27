@@ -6,7 +6,6 @@ import Note from "./note/note";
 import Cookies from "js-cookie";
 import { Setting2, LogoutCurve } from "iconsax-react";
 import { useState, useEffect } from "react";
-import { Waveform } from "@uiball/loaders";
 import "react-toastify/dist/ReactToastify.css";
 import "./dashboard.css";
 
@@ -99,6 +98,7 @@ const Dashboard = ({ onLogOut }) => {
         else if (showAddNoteForm === true) handleAddNoteFormChange();
 
         setEditDataNote({});
+        setEditDataTask({});
     };
 
     const handleEscKey = (event) => {
@@ -272,8 +272,8 @@ const Dashboard = ({ onLogOut }) => {
             </div>
             <div className='dashboard-main'>
                 <div className='dashboard-content'>
-                    {!isTasksLoading ? (
-                        tasks.length > 0 ? (
+                    {!isTasksLoading &&
+                        (tasks.length > 0 ? (
                             tasks.map((task) => (
                                 <Task
                                     key={task.id}
@@ -281,6 +281,7 @@ const Dashboard = ({ onLogOut }) => {
                                     desc={task.description}
                                     dueDate={task.due_date}
                                     createdAt={task.created_at}
+                                    userRole={userData.role}
                                     isFavorite={task.is_favorite}
                                     taskID={task.id}
                                     handleChangeFavorite={handleChangeFavorite}
@@ -290,20 +291,15 @@ const Dashboard = ({ onLogOut }) => {
                             ))
                         ) : (
                             <div className='no-tasks'>Brak zadań.</div>
-                        )
-                    ) : (
-                        <div className='loader'>
-                            <Waveform size={55} color='#231F20' />
-                        </div>
-                    )}
+                        ))}
                 </div>
 
                 <div className='separator'></div>
 
                 <div className='dashboard-right'>
                     <div className='dashboard-right-content'>
-                        {!isNotesLoading ? (
-                            notes.length > 0 ? (
+                        {!isNotesLoading &&
+                            (notes.length > 0 ? (
                                 notes.map((note) => (
                                     <Note
                                         key={note.id}
@@ -317,12 +313,7 @@ const Dashboard = ({ onLogOut }) => {
                                 ))
                             ) : (
                                 <div className='no-notes'>Brak notatek.</div>
-                            )
-                        ) : (
-                            <div className='loader'>
-                                <Waveform size={55} color='#231F20' />
-                            </div>
-                        )}
+                            ))}
                     </div>
                 </div>
             </div>
