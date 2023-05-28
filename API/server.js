@@ -2,6 +2,9 @@
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
+const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const { v4: uuidv4 } = require("uuid");
 
 // Tworzenie instancji aplikacji Express
 const app = express();
@@ -10,6 +13,7 @@ const app = express();
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 // Ustawienie nagłówków do obsługi CORS
 app.use((req, res, next) => {
@@ -79,25 +83,161 @@ app.get("/users", (req, res) => {
  * @param {string} req.params.login - Login użytkownika.
  * @returns {object} - Obiekt JSON zawierający wyniki zapytania do bazy danych.
  */
-app.get("/users/:login", (req, res) => {
-    const login = req.params.login;
+app.post("/login", (req, res) => {
+    const { login, password, rememberMe } = req.body;
 
     connection.query(
         "SELECT * FROM users WHERE login = ? COLLATE utf8mb4_bin",
         [login],
-        (err, results) => {
+        async (err, results) => {
             if (err) {
                 console.error("Error querying database:", err);
                 res.status(500).send("Error querying database");
             } else {
-                console.log(results);
                 if (results.length === 0) {
-                    res.json({ exists: false });
+                    res.status(404).send("User not found");
                 } else {
                     const user = results[0];
-                    res.json({ exists: true, user });
+                    const passwordMatch = await bcrypt.compare(
+                        password,
+                        user.password
+                    );
+                    if (passwordMatch) {
+                        const token = uuidv4();
+
+                        const sessionData = {
+                            user_id: user.id,
+                            token: token,
+                            expiration: rememberMe
+                                ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                                : new Date(
+                                      Date.now() + 1 * 24 * 60 * 60 * 1000
+                                  ),
+                            type: rememberMe ? "long" : "short",
+                        };
+
+                        connection.query(
+                            "DELETE FROM sessions WHERE user_id = ?",
+                            [sessionData.user_id],
+                            (deleteErr) => {
+                                if (deleteErr) {
+                                    console.error(
+                                        "Error deleting existing session:",
+                                        deleteErr
+                                    );
+                                    res.status(500).send(
+                                        "Error deleting existing session."
+                                    );
+                                } else {
+                                    connection.query(
+                                        "INSERT INTO sessions SET ?",
+                                        sessionData,
+                                        (insertErr) => {
+                                            if (insertErr) {
+                                                console.error(
+                                                    "Error inserting session into database:",
+                                                    insertErr
+                                                );
+                                                res.status(500).send(
+                                                    "Error inserting into database."
+                                                );
+                                            } else {
+                                                console.log(
+                                                    "Session added to database"
+                                                );
+                                                res.status(200).send({
+                                                    token: token,
+                                                    expires:
+                                                        sessionData.expiration,
+                                                    type: sessionData.type,
+                                                });
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+                        );
+                    } else {
+                        res.status(401).send("Invalid password");
+                    }
                 }
             }
+        }
+    );
+});
+
+app.get("/session/:token", (req, res) => {
+    const token = req.params.token.slice(1);
+    if (!token) {
+        return res.status(401).json({ message: "Token not provided" });
+    }
+    connection.query(
+        "SELECT * FROM sessions WHERE token = ?",
+        [token],
+        (err, results) => {
+            if (err) {
+                console.error("Error querying database:", err);
+                return res
+                    .status(500)
+                    .json({ message: "Error querying database" });
+            }
+
+            if (results.length === 0) {
+                return res.status(404).json({ message: "Session not found" });
+            }
+
+            const session = results[0];
+            const userId = session.user_id;
+
+            connection.query(
+                "SELECT * FROM users WHERE id = ?",
+                [userId],
+                (err, results) => {
+                    if (err) {
+                        console.error("Error querying database:", err);
+                        return res
+                            .status(500)
+                            .json({ message: "Error querying database" });
+                    }
+
+                    if (results.length === 0) {
+                        return res
+                            .status(404)
+                            .json({ message: "User not found" });
+                    }
+
+                    const user = results[0];
+                    return res.status(200).json(user);
+                }
+            );
+        }
+    );
+});
+
+app.post("/logout/:token", (req, res) => {
+    // Usunięcie `:` z początku tokenu
+    const token = req.params.token.slice(1);
+
+    if (!token) {
+        return res.status(401).json({ message: "Token not provided" });
+    }
+
+    connection.query(
+        "DELETE FROM sessions WHERE token = ?",
+        [token],
+        (err, results) => {
+            if (err) {
+                console.error("Error querying database:", err);
+                return res
+                    .status(500)
+                    .json({ message: "Error querying database" });
+            }
+
+            if (results.affectedRows === 0) {
+                return res.status(404).json({ message: "Session not found" });
+            }
+
+            return res.status(200).json({ message: "Logged out successfully" });
         }
     );
 });

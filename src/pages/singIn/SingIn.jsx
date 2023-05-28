@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { json, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import bcrypt from "bcryptjs";
 import "./singin.css";
@@ -48,36 +48,6 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
         navigate("/register");
     };
 
-    const handleUserDataCheck = (data) => {
-        if (userData.login !== data.login) {
-            dotLogin.current.style.display = "block";
-            errorLogin.current.style.display = "block";
-            errorLogin.current.textContent = "Błędny login lub hasło";
-            console.log("1");
-        } else {
-            dotLogin.current.style.display = "none";
-            errorLogin.current.style.display = "none";
-
-            bcrypt.compare(userData.password, data.password).then((match) => {
-                if (!match) {
-                    dotLogin.current.style.display = "block";
-                    errorLogin.current.style.display = "block";
-                    errorLogin.current.textContent = "Błędny login lub hasło";
-                } else {
-                    dotLogin.current.style.display = "none";
-                    errorLogin.current.style.display = "none";
-
-                    if (userData.rememberMe) {
-                        Cookies.set("login", userData.login, { expires: 7 });
-                        Cookies.set("isLoggedIn", true, { expires: 7 });
-                    }
-
-                    onLogin();
-                }
-            });
-        }
-    };
-
     const handleLogIn = () => {
         if (!userData.login || !userData.password) {
             if (!userData.login) {
@@ -99,25 +69,34 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
             }
             return;
         } else {
-            fetch(`http://localhost:3010/users/${userData.login}`)
-                .then((response) => response.json())
+            fetch("http://localhost:3010/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(userData),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(
+                            `HTTP error! Status: ${response.status}`
+                        );
+                    }
+                    return response.json();
+                })
                 .then((data) => {
-                    if (data.exists) {
-                        handleUserDataCheck(data.user);
-                    }
-                    if (!data.exists) {
-                        console.log("Użytkownik nie istnieje");
-                        dotLogin.current.style.display = "block";
-                        errorLogin.current.style.display = "block";
-                        errorLogin.current.textContent =
-                            "Błędny login lub hasło";
-                    } else {
-                        dotLogin.current.style.display = "none";
-                        errorLogin.current.style.display = "none";
-                    }
+                    onLogin(data);
                 })
                 .catch((error) => {
                     console.error("Błąd pobierania danych użytkownika:", error);
+
+                    if (error.message.includes("500")) {
+                        console.error("Błąd serwera");
+                    } else if (error.message.includes("401")) {
+                        console.error("Błędny login lub hasło");
+                    } else {
+                        console.error("Nieznany błąd");
+                    }
                 });
         }
     };

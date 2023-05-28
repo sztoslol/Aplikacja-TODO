@@ -153,6 +153,7 @@
 
 /*==========================Content=======================*/
 .dashboard-content {
+    flex: 2;
     height: 863px;
     width: 1058px;
     margin-left: 97.5px;
@@ -199,6 +200,7 @@
 }
 
 .dashboard-right-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
