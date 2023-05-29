@@ -20,8 +20,7 @@ import "./dashboard.css";
         -= Nie uwzględniono dashboard -> dokończyć =-
 */
 
-const Dashboard = ({ onLogOut }) => {
-    const [userLogin, setUserLogin] = useState(Cookies.get("login") || "");
+const Dashboard = ({ onLogOut, userData }) => {
     const [showAddNoteForm, setShowAddNoteForm] = useState(false);
     const [showAddTaskForm, setShowAddTaskForm] = useState(false);
     const [selectedOption, setSelectedOption] = useState("all");
@@ -31,20 +30,8 @@ const Dashboard = ({ onLogOut }) => {
     const [deletedTaskId, setDeletedTaskId] = useState(null);
     const [editDataNote, setEditDataNote] = useState({});
     const [editDataTask, setEditDataTask] = useState({});
-    const [userData, setUserData] = useState();
     const [notes, setNotes] = useState([]);
     const [tasks, setTasks] = useState([]);
-
-    useEffect(() => {
-        fetch(`http://localhost:3010/users/${userLogin}`)
-            .then((response) => response.json())
-            .then((data) =>
-                setUserData(() => {
-                    return data.user;
-                })
-            )
-            .catch((error) => console.error(error));
-    }, []);
 
     useEffect(() => {
         setIsNotesLoading(true);
@@ -67,7 +54,7 @@ const Dashboard = ({ onLogOut }) => {
         userData &&
             Object.keys(userData).length > 0 &&
             fetch(
-                `http://localhost:3010/tasks/${userLogin}?filter=${selectedOption}`
+                `http://localhost:3010/tasks/${userData.login}?filter=${selectedOption}`
             )
                 .then((response) => response.json())
                 .then((data) => {
@@ -78,7 +65,9 @@ const Dashboard = ({ onLogOut }) => {
                     console.error(error);
                     setIsTasksLoading(false);
                 });
-    }, [showAddTaskForm, userLogin, userData, selectedOption, deletedTaskId]);
+    }, [showAddTaskForm, selectedOption, deletedTaskId]);
+
+    console.log(userData);
 
     const handleAddTaskFormChange = () => setShowAddTaskForm((prev) => !prev);
     const handleAddNoteFormChange = () => setShowAddNoteForm((prev) => !prev);
@@ -262,11 +251,16 @@ const Dashboard = ({ onLogOut }) => {
                     >
                         Dodaj notatke
                     </button>
-                    <button className='dashboard-topbar-menu-minibtn'>
-                        <Setting2 />
-                    </button>
-                    <button className='dashboard-topbar-menu-minibtn'>
-                        <LogoutCurve onClick={() => onLogOut()} />
+                    {userData.role === "admin" && (
+                        <button className='dashboard-topbar-menu-minibtn'>
+                            <Setting2 />
+                        </button>
+                    )}
+                    <button
+                        className='dashboard-topbar-menu-minibtn'
+                        onClick={() => onLogOut()}
+                    >
+                        <LogoutCurve />
                     </button>
                 </div>
             </div>

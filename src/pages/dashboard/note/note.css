@@ -1,5 +1,5 @@
 .note-main {
-    width: 539px;
+    max-width: 539px;
     height: fit-content;
     display: flex;
     flex-direction: column;
