@@ -585,6 +585,7 @@ app.put("/notes/:id", (req, res) => {
 app.put("/tasks/:id", (req, res) => {
     const taskId = req.params.id;
     const { name, description, due_date, target_users } = req.body;
+
     const formattedDueDate = new Date(due_date);
     const year = formattedDueDate.getFullYear();
     const month = String(formattedDueDate.getMonth() + 1).padStart(2, "0");

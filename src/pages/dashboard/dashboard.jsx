@@ -67,6 +67,8 @@ const Dashboard = ({ onLogOut, userData }) => {
                 });
     }, [showAddTaskForm, selectedOption, deletedTaskId]);
 
+    console.log(userData);
+
     const handleAddTaskFormChange = () => setShowAddTaskForm((prev) => !prev);
     const handleAddNoteFormChange = () => setShowAddNoteForm((prev) => !prev);
 
@@ -249,7 +251,7 @@ const Dashboard = ({ onLogOut, userData }) => {
                     >
                         Dodaj notatke
                     </button>
-                    {userData.type === "admin" && (
+                    {userData.role === "admin" && (
                         <button className='dashboard-topbar-menu-minibtn'>
                             <Setting2 />
                         </button>

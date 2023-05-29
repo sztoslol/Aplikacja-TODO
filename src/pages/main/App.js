@@ -10,20 +10,11 @@ import Cookies from "js-cookie";
 const App = () => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [token, setToken] = useState(
         sessionStorage.getItem("session")
             ? { token: sessionStorage.getItem("session").toString() }
             : { token: "" }
-    );
-
-    console.log("userdata", userData);
-    console.log("loading", isLoading);
-    console.log("logged", isLoggedIn);
-    console.log("token", token);
-    console.log(
-        "============================================================================="
     );
 
     useEffect(() => {
@@ -52,7 +43,6 @@ const App = () => {
                 .then((data) => {
                     setUserData(data);
                     setIsLoggedIn(true);
-                    setIsLoading(false);
                     navigate("/");
                 })
                 .catch((error) => {
