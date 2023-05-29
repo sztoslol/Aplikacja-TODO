@@ -5,6 +5,8 @@ import Dashboard from "../dashboard/dashboard.jsx";
 import SingIn from "../singIn/singin";
 import Register from "../register/register";
 import ProtectedRoutes from "../../ProtectedRoutes";
+import Edition from "../edition/edition";
+import Settings from "../settings/settings";
 import Cookies from "js-cookie";
 
 const App = () => {
@@ -95,7 +97,7 @@ const App = () => {
                 <Route
                     path='/'
                     element={
-                        <Dashboard
+                        <Settings
                             onLogOut={handleLogOut}
                             userData={userData}
                         />
