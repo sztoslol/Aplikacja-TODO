@@ -3,7 +3,6 @@ import AddTaskForm from "./addTaskForm/addTaskForm";
 import AddNoteForm from "./addNoteForm/addNoteForm";
 import Task from "./task/task";
 import Note from "./note/note";
-import Cookies from "js-cookie";
 import { Setting2, LogoutCurve } from "iconsax-react";
 import { useState, useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,21 +10,16 @@ import "./dashboard.css";
 
 /*
     Obłsuga formularzy(w tym dodanie danych do bazy) znajduje się w ich komponentach
-    
-    TODO: 
-        -> Pliki cookies => token + baza danych
-        -> Naprawa formularzy
-        -> Dodanie edycji zadań
-        -> Naprawić błąd związany z niezapisywaniem do session storage odpowiadnich danych 
-        -= Nie uwzględniono dashboard -> dokończyć =-
 */
 
-const Dashboard = ({ onLogOut, userData }) => {
+const Dashboard = ({ onLogOut, userData, goToSettings }) => {
     const [showAddNoteForm, setShowAddNoteForm] = useState(false);
     const [showAddTaskForm, setShowAddTaskForm] = useState(false);
     const [selectedOption, setSelectedOption] = useState("all");
     const [isTasksLoading, setIsTasksLoading] = useState(false);
     const [isNotesLoading, setIsNotesLoading] = useState(false);
+    const [renderIndexTasks, setRenderIndexTask] = useState(0);
+    const [renderIndexNote, setRenderIndexNote] = useState(0);
     const [deletedNoteId, setDeletedNoteId] = useState(null);
     const [deletedTaskId, setDeletedTaskId] = useState(null);
     const [editDataNote, setEditDataNote] = useState({});
@@ -41,6 +35,7 @@ const Dashboard = ({ onLogOut, userData }) => {
             .then((data) => {
                 setNotes(data);
                 setIsNotesLoading(false);
+                setRenderIndexNote(0);
             })
             .catch((error) => {
                 console.error(error);
@@ -60,6 +55,7 @@ const Dashboard = ({ onLogOut, userData }) => {
                 .then((data) => {
                     setTasks(data);
                     setIsTasksLoading(false);
+                    setRenderIndexTask(0);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -67,7 +63,25 @@ const Dashboard = ({ onLogOut, userData }) => {
                 });
     }, [showAddTaskForm, selectedOption, deletedTaskId]);
 
-    console.log(userData);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setRenderIndexTask((prevIndex) => prevIndex + 1);
+        }, 500);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [renderIndexTasks]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setRenderIndexNote((prevIndex) => prevIndex + 1);
+        }, 500);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [renderIndexNote]);
 
     const handleAddTaskFormChange = () => setShowAddTaskForm((prev) => !prev);
     const handleAddNoteFormChange = () => setShowAddNoteForm((prev) => !prev);
@@ -207,7 +221,10 @@ const Dashboard = ({ onLogOut, userData }) => {
                         name='radio-filter'
                         value='all'
                         checked={selectedOption === "all"}
-                        onChange={() => setSelectedOption("all")}
+                        onChange={() => {
+                            setSelectedOption("all");
+                            setRenderIndexTask(0);
+                        }}
                     />
                     <label htmlFor='all'>Wszystkie</label>
                     <input
@@ -216,7 +233,10 @@ const Dashboard = ({ onLogOut, userData }) => {
                         name='radio-filter'
                         value='saved'
                         checked={selectedOption === "saved"}
-                        onChange={() => setSelectedOption("saved")}
+                        onChange={() => {
+                            setSelectedOption("saved");
+                            setRenderIndexTask(0);
+                        }}
                     />
                     <label htmlFor='saved'>Zapisane</label>
                     <input
@@ -225,7 +245,10 @@ const Dashboard = ({ onLogOut, userData }) => {
                         name='radio-filter'
                         value='completed'
                         checked={selectedOption === "completed"}
-                        onChange={() => setSelectedOption("completed")}
+                        onChange={() => {
+                            setSelectedOption("completed");
+                            setRenderIndexTask(0);
+                        }}
                     />
                     <label htmlFor='completed'>Wykonane</label>
                     <input
@@ -234,7 +257,10 @@ const Dashboard = ({ onLogOut, userData }) => {
                         name='radio-filter'
                         value='upcoming'
                         checked={selectedOption === "upcoming"}
-                        onChange={() => setSelectedOption("upcoming")}
+                        onChange={() => {
+                            setSelectedOption("upcoming");
+                            setRenderIndexTask(0);
+                        }}
                     />
                     <label htmlFor='upcoming'>Nadchodzące</label>
                 </div>
@@ -252,7 +278,10 @@ const Dashboard = ({ onLogOut, userData }) => {
                         Dodaj notatke
                     </button>
                     {userData.role === "admin" && (
-                        <button className='dashboard-topbar-menu-minibtn'>
+                        <button
+                            className='dashboard-topbar-menu-minibtn'
+                            onClick={() => goToSettings()}
+                        >
                             <Setting2 />
                         </button>
                     )}
@@ -268,21 +297,25 @@ const Dashboard = ({ onLogOut, userData }) => {
                 <div className='dashboard-content'>
                     {!isTasksLoading &&
                         (tasks.length > 0 ? (
-                            tasks.map((task) => (
-                                <Task
-                                    key={task.id}
-                                    header={task.name}
-                                    desc={task.description}
-                                    dueDate={task.due_date}
-                                    createdAt={task.created_at}
-                                    userRole={userData.role}
-                                    isFavorite={task.is_favorite}
-                                    taskID={task.id}
-                                    handleChangeFavorite={handleChangeFavorite}
-                                    handleDeleteTask={handleDeleteTask}
-                                    handleEditTask={editTask}
-                                />
-                            ))
+                            tasks
+                                .slice(0, renderIndexTasks)
+                                .map((task, index) => (
+                                    <Task
+                                        index={index}
+                                        header={task.name}
+                                        desc={task.description}
+                                        dueDate={task.due_date}
+                                        createdAt={task.created_at}
+                                        userRole={userData.role}
+                                        isFavorite={task.is_favorite}
+                                        taskID={task.id}
+                                        handleChangeFavorite={
+                                            handleChangeFavorite
+                                        }
+                                        handleDeleteTask={handleDeleteTask}
+                                        handleEditTask={editTask}
+                                    />
+                                ))
                         ) : (
                             <div className='no-tasks'>Brak zadań.</div>
                         ))}
@@ -294,17 +327,19 @@ const Dashboard = ({ onLogOut, userData }) => {
                     <div className='dashboard-right-content'>
                         {!isNotesLoading &&
                             (notes.length > 0 ? (
-                                notes.map((note) => (
-                                    <Note
-                                        key={note.id}
-                                        header={note.name}
-                                        desc={note.description}
-                                        date={formatDate(note.created_at)}
-                                        id={note.id}
-                                        handleDeleteNote={handleDeleteNote}
-                                        handleEditNote={editNote}
-                                    />
-                                ))
+                                notes
+                                    .slice(0, renderIndexNote)
+                                    .map((note) => (
+                                        <Note
+                                            key={note.id}
+                                            header={note.name}
+                                            desc={note.description}
+                                            date={formatDate(note.created_at)}
+                                            id={note.id}
+                                            handleDeleteNote={handleDeleteNote}
+                                            handleEditNote={editNote}
+                                        />
+                                    ))
                             ) : (
                                 <div className='no-notes'>Brak notatek.</div>
                             ))}

@@ -2,6 +2,7 @@ import "./App.css";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Dashboard from "../dashboard/dashboard.jsx";
+import Settings from "../settings/settings"; // Poprawna nazwa importu
 import SingIn from "../singIn/singin";
 import Register from "../register/register";
 import ProtectedRoutes from "../../ProtectedRoutes";
@@ -11,6 +12,7 @@ const App = () => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [directory, setDirectory] = useState("/");
     const [token, setToken] = useState(
         sessionStorage.getItem("session")
             ? { token: sessionStorage.getItem("session").toString() }
@@ -29,9 +31,10 @@ const App = () => {
         }
     }, []);
 
+    console.log(token.token);
+
     useEffect(() => {
         if (token.token !== "") {
-            console.log("test", token.token);
             fetch(`http://localhost:3010/session/:${token.token}`)
                 .then((response) => {
                     if (response.ok) {
@@ -43,14 +46,14 @@ const App = () => {
                 .then((data) => {
                     setUserData(data);
                     setIsLoggedIn(true);
-                    navigate("/");
+                    navigate(directory);
                 })
                 .catch((error) => {
                     console.error("Error:", error);
                     navigate("/login");
                 });
         }
-    }, [token]);
+    }, [token, directory]);
 
     const handleLogin = (tokenData) => {
         if (tokenData.type !== "short") {
@@ -74,6 +77,8 @@ const App = () => {
                 if (response.ok) {
                     Cookies.remove("session");
                     Cookies.remove("session_type");
+                    sessionStorage.removeItem("session");
+                    sessionStorage.removeItem("session_type");
                     navigate("/login");
                 } else {
                     console.error("Failed to log out");
@@ -82,6 +87,14 @@ const App = () => {
             .catch((error) => {
                 console.error("Error:", error);
             });
+    };
+
+    const goToSettings = () => {
+        setDirectory("/settings");
+    };
+
+    const backFromSettings = () => {
+        setDirectory("/");
     };
 
     return (
@@ -98,6 +111,16 @@ const App = () => {
                         <Dashboard
                             onLogOut={handleLogOut}
                             userData={userData}
+                            goToSettings={goToSettings}
+                        />
+                    }
+                />
+                <Route
+                    path='/settings'
+                    element={
+                        <Settings
+                            handleGoBack={backFromSettings}
+                            userID={userData && userData.id}
                         />
                     }
                 />

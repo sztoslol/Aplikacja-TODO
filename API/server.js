@@ -166,6 +166,93 @@ app.post("/login", (req, res) => {
     );
 });
 
+app.post("/register", (req, res) => {
+    const { login, password, rememberMe } = req.body;
+
+    connection.query(
+        "SELECT * FROM users WHERE login = ? COLLATE utf8mb4_bin",
+        [login],
+        async (err, results) => {
+            if (err) {
+                console.error("Error querying database:", err);
+                res.status(500).send("Error querying database");
+            } else {
+                if (results.length > 0) {
+                    res.status(409).send("User already exists");
+                } else {
+                    const hashedPassword = await bcrypt.hash(password, 10);
+
+                    const userData = {
+                        login: login,
+                        password: hashedPassword,
+                        role: "user",
+                    };
+
+                    connection.query(
+                        "INSERT INTO users SET ?",
+                        userData,
+                        (insertErr) => {
+                            if (insertErr) {
+                                console.error(
+                                    "Error inserting user into database:",
+                                    insertErr
+                                );
+                                res.status(500).send(
+                                    "Error inserting into database."
+                                );
+                            } else {
+                                console.log("User registered successfully");
+
+                                const token = uuidv4();
+
+                                const sessionData = {
+                                    user_id: results.id,
+                                    token: token,
+                                    expiration: rememberMe
+                                        ? new Date(
+                                              Date.now() +
+                                                  7 * 24 * 60 * 60 * 1000
+                                          )
+                                        : new Date(
+                                              Date.now() +
+                                                  1 * 24 * 60 * 60 * 1000
+                                          ),
+                                    type: rememberMe ? "long" : "short",
+                                };
+
+                                connection.query(
+                                    "INSERT INTO sessions SET ?",
+                                    sessionData,
+                                    (insertErr) => {
+                                        if (insertErr) {
+                                            console.error(
+                                                "Error inserting session into database:",
+                                                insertErr
+                                            );
+                                            res.status(500).send(
+                                                "Error inserting into database."
+                                            );
+                                        } else {
+                                            console.log(
+                                                "Session added to database"
+                                            );
+                                            res.status(200).send({
+                                                token: token,
+                                                expires: sessionData.expiration,
+                                                type: sessionData.type,
+                                            });
+                                        }
+                                    }
+                                );
+                            }
+                        }
+                    );
+                }
+            }
+        }
+    );
+});
+
 app.get("/session/:token", (req, res) => {
     const token = req.params.token.slice(1);
     if (!token) {
@@ -388,10 +475,12 @@ app.get("/tasks/:id/users", (req, res) => {
  * @param {string} req.body.password - Hasło nowego użytkownika.
  */
 app.post("/users", (req, res) => {
-    const { login, password } = req.body;
+    const { login, password, role } = req.body;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
     connection.query(
-        "INSERT INTO users (login, password) VALUES (?, ?)",
-        [login, password],
+        "INSERT INTO users (login, password, role) VALUES (?, ?, ?)",
+        [login, hashedPassword, role],
         (err, results) => {
             if (err) {
                 console.error("Error querying database:", err);
@@ -503,6 +592,33 @@ app.post("/tasks", (req, res) => {
                     }
                 );
             }
+        }
+    );
+});
+
+/**
+ *  Edycja uzytkownika
+ */
+
+app.put("/users/:id", (req, res) => {
+    const userId = req.params.id;
+    const { login, password, role } = req.body;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    connection.query(
+        "UPDATE users SET login = ?, password = ?, role = ? WHERE id = ?",
+        [login, hashedPassword, role, userId],
+        (err, result) => {
+            if (err) {
+                console.error("Błąd podczas aktualizacji użytkownika:", err);
+                res.status(500).json({
+                    error: "Błąd podczas aktualizacji użytkownika",
+                });
+                return;
+            }
+
+            console.log("Zaktualizowano użytkownika o id:", userId);
+            res.sendStatus(200);
         }
     );
 });
@@ -722,4 +838,34 @@ app.delete("/notes/:id", (req, res) => {
             }
         }
     });
+});
+
+// Usuwanie użytkownika
+app.delete("/users/:id", (req, res) => {
+    const userId = req.params.id;
+
+    connection.query(
+        "DELETE FROM users WHERE id = ?",
+        [userId],
+        (err, result) => {
+            if (err) {
+                console.error("Błąd podczas usuwania użytkownika:", err);
+                res.status(500).json({
+                    error: "Błąd podczas usuwania użytkownika",
+                });
+                return;
+            }
+
+            if (result.affectedRows === 0) {
+                console.log("Nie znaleziono użytkownika o podanym ID");
+                res.status(404).json({
+                    error: "Nie znaleziono użytkownika o podanym ID",
+                });
+                return;
+            }
+
+            console.log("Usunięto użytkownika");
+            res.sendStatus(200);
+        }
+    );
 });

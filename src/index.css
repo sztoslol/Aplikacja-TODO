@@ -9,6 +9,7 @@ body {
 #root {
     width: 100vw;
     height: 100vh;
+    --toastify-font-family: "Rubik";
 }
 
 .loader {
@@ -21,4 +22,20 @@ body {
 .note-main,
 .task-main {
     user-select: none;
+}
+
+.form-error-text {
+    font-family: Rubik;
+    font-weight: 500;
+    font-size: 14px;
+    color: #ff0000;
+}
+
+.dot {
+    height: 7px;
+    width: 7px;
+    border-radius: 100%;
+    background-color: red;
+    margin-right: 1px;
+    margin-left: 5px;
 }

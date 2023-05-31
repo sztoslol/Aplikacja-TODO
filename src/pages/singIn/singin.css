@@ -76,24 +76,6 @@
     align-items: center;
 }
 
-.form-error-text {
-    font-family: Rubik;
-    font-weight: 500;
-    font-size: 14px;
-    color: #ff0000;
-    display: none;
-}
-
-.dot {
-    height: 7px;
-    width: 7px;
-    border-radius: 100%;
-    background-color: red;
-    margin-right: 1px;
-    margin-left: 5px;
-    display: none;
-}
-
 .login-input-login {
     width: 100%;
     height: 60px;

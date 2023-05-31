@@ -8,8 +8,10 @@ import {
 import { Calendar, ArchiveAdd, ArchiveTick, Trash, Edit2 } from "iconsax-react";
 import { useState } from "react";
 import "./task.css";
+import "animate.css";
 
 const Task = ({
+    index,
     taskID,
     header,
     desc,
@@ -58,7 +60,14 @@ const Task = ({
     };
 
     return (
-        <div className='task-main'>
+        <div
+            className={
+                "task-main animate__animated " +
+                (index % 2 === 1
+                    ? "animate__fadeInRight"
+                    : "animate__fadeInLeft")
+            }
+        >
             <div className='task-header'>{header}</div>
 
             <div className='task-description'>{desc}</div>

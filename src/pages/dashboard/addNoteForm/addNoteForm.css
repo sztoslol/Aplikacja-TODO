@@ -76,7 +76,8 @@
 }
 
 .noteForm-input-notename-top,
-.noteForm-input-notedesc-top {
+.noteForm-input-notedesc-top,
+.datepicker-outer-top {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;

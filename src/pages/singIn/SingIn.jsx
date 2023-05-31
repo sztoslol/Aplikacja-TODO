@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { json, useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
-import bcrypt from "bcryptjs";
+import { useNavigate } from "react-router-dom";
 import "./singin.css";
 import "animate.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 
 const SingIn = ({ onLogin, isLoggedIn }) => {
     const dotLogin = useRef(null);
@@ -49,60 +49,68 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
     };
 
     const handleLogIn = () => {
-        if (!userData.login || !userData.password) {
-            if (!userData.login) {
-                dotLogin.current.style.display = "block";
-                errorLogin.current.style.display = "block";
-                errorLogin.current.textContent = "Uzupełnij to pole!";
-            } else {
-                dotLogin.current.style.display = "none";
-                errorLogin.current.style.display = "none";
-            }
-
-            if (!userData.password) {
-                dotPassword.current.style.display = "block";
-                errorPassword.current.style.display = "block";
-                errorPassword.current.textContent = "Uzupełnij to pole!";
-            } else {
-                dotPassword.current.style.display = "none";
-                errorPassword.current.style.display = "none";
-            }
-            return;
+        if (!userData.login) {
+            dotLogin.current.style.display = "block";
+            errorLogin.current.style.display = "block";
+            errorLogin.current.textContent = "Uzupełnij to pole!";
         } else {
-            fetch("http://localhost:3010/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(userData),
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(
-                            `HTTP error! Status: ${response.status}`
-                        );
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    onLogin(data);
-                })
-                .catch((error) => {
-                    console.error("Błąd pobierania danych użytkownika:", error);
-
-                    if (error.message.includes("500")) {
-                        console.error("Błąd serwera");
-                    } else if (error.message.includes("401")) {
-                        console.error("Błędny login lub hasło");
-                    } else {
-                        console.error("Nieznany błąd");
-                    }
-                });
+            dotLogin.current.style.display = "none";
+            errorLogin.current.style.display = "none";
         }
+
+        if (!userData.password) {
+            dotPassword.current.style.display = "block";
+            errorPassword.current.style.display = "block";
+            errorPassword.current.textContent = "Uzupełnij to pole!";
+        } else {
+            dotPassword.current.style.display = "none";
+            errorPassword.current.style.display = "none";
+        }
+
+        fetch("http://localhost:3010/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userData),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                onLogin(data);
+            })
+            .catch((error) => {
+                console.error("Błąd pobierania danych użytkownika:", error);
+
+                if (error.message.includes("500")) {
+                    console.error("Błąd serwera");
+                    toast.error("Błąd serwera", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                } else if (
+                    error.message.includes("401") ||
+                    error.message.includes("404")
+                ) {
+                    console.error("Błędny login lub hasło");
+                    toast.error("Błędny login lub hasło", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                } else {
+                    console.error("Nieznany błąd");
+                    toast.error("Nieznany błąd", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                }
+            });
     };
 
     return (
         <>
+            <ToastContainer />
             <div id='login-background'></div>
             <div id='login-main'>
                 <div id='login-emotes'>👋😁</div>

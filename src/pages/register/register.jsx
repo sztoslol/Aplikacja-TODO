@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import Cookies from "js-cookie";
-import bcrypt from "bcryptjs";
 import "./register.css";
 import "animate.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 
 const Register = ({ onLogin, isLoggedIn }) => {
     const dotLogin = useRef(null);
@@ -61,38 +61,38 @@ const Register = ({ onLogin, isLoggedIn }) => {
     };
 
     const handleAddUser = () => {
-        if (
-            !userData.login ||
-            !userData.password ||
-            !userData.confirmPassword
-        ) {
-            if (!userData.login) {
-                dotLogin.current.style.display = "block";
-                errorLogin.current.style.display = "block";
-                errorLogin.current.textContent = "Uzupełnij to pole!";
-            } else {
-                dotLogin.current.style.display = "none";
-                errorLogin.current.style.display = "none";
-            }
+        /**
+         * Sprawdzanie po kolei:
+         *      -> Wypełnienia pól
+         *      -> To czy hasło jest odpowiednio długie
+         *      -> To czy hasło spełnia wyrażenie
+         */
 
-            if (!userData.password) {
-                dotPassword.current.style.display = "block";
-                errorPassword.current.style.display = "block";
-                errorPassword.current.textContent = "Uzupełnij to pole!";
-            } else {
-                dotPassword.current.style.display = "none";
-                errorPassword.current.style.display = "none";
-            }
+        if (!userData.login) {
+            dotLogin.current.style.display = "block";
+            errorLogin.current.style.display = "block";
+            errorLogin.current.textContent = "Uzupełnij to pole!";
+        } else {
+            dotLogin.current.style.display = "none";
+            errorLogin.current.style.display = "none";
+        }
 
-            if (!userData.confirmPassword) {
-                dotConfirmPassword.current.style.display = "block";
-                errorConfirmPassword.current.style.display = "block";
-                errorConfirmPassword.current.textContent = "Uzupełnij to pole!";
-            } else {
-                dotConfirmPassword.current.style.display = "none";
-                errorConfirmPassword.current.style.display = "none";
-            }
-            return;
+        if (!userData.password) {
+            dotPassword.current.style.display = "block";
+            errorPassword.current.style.display = "block";
+            errorPassword.current.textContent = "Uzupełnij to pole!";
+        } else {
+            dotPassword.current.style.display = "none";
+            errorPassword.current.style.display = "none";
+        }
+
+        if (!userData.confirmPassword) {
+            dotConfirmPassword.current.style.display = "block";
+            errorConfirmPassword.current.style.display = "block";
+            errorConfirmPassword.current.textContent = "Uzupełnij to pole!";
+        } else {
+            dotConfirmPassword.current.style.display = "none";
+            errorConfirmPassword.current.style.display = "none";
         }
 
         if (userData.login.length <= 3) {
@@ -129,50 +129,59 @@ const Register = ({ onLogin, isLoggedIn }) => {
             errorConfirmPassword.current.display = "none";
         }
 
-        // Sprawdzenie, czy użytkownik o podanym loginie już istnieje
-        fetch(`http://localhost:3010/users/${userData.login}`)
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.exists) {
-                    errorLogin.current.textContent = "Login zajęty";
-                    errorLogin.current.style.display = "block";
-                    dotLogin.current.style.display = "block";
-                    console.log("User with this login already exists");
-                    return;
-                }
-                // Dodanie nowego użytkownika do bazy danych
-                return fetch("http://localhost:3010/users", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        login: userData.login,
-                        password: bcrypt.hashSync(userData.password, 10),
-                    }),
-                });
-            })
+        fetch("http://localhost:3010/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                login: userData.login,
+                password: userData.password,
+                rememberMe: userData.rememberMe,
+            }),
+        })
             .then((response) => {
-                if (response && response.ok) {
-                    console.log("User added successfully");
-
-                    if (userData.rememberMe) {
-                        Cookies.set("login", userData.login, { expires: 7 });
-                        Cookies.set("isLoggedIn", true, { expires: 7 });
-                    }
-
-                    onLogin();
-                } else {
-                    throw new Error("Error adding user to database");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
+                return response.json();
+            })
+            .then((data) => {
+                onLogin(data);
             })
             .catch((error) => {
-                console.error("Error:", error);
+                console.error("Błąd pobierania danych użytkownika:", error);
+
+                if (error.message.includes("500")) {
+                    console.error("Błąd serwera");
+                    toast.error("Błąd serwera", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                } else if (
+                    error.message.includes("401") ||
+                    error.message.includes("404")
+                ) {
+                    console.error("Błędny login lub hasło");
+                    toast.error("Błędny login lub hasło", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                } else if (error.message.includes("409")) {
+                    console.error("Taki użytkownik już istnieje");
+                    toast.error("Taki użytkownik już istnieje", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                } else {
+                    console.error("Nieznany błąd");
+                    toast.error("Nieznany błąd", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                }
             });
     };
 
     return (
         <>
+            <ToastContainer />
             <div id='register-background'></div>
             <div id='register-main'>
                 <div id='register-emotes'>👋🤗</div>

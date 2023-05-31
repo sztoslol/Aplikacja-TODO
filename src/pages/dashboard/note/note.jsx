@@ -1,5 +1,6 @@
 import "./note.css";
 import { Calendar, Trash, Edit2 } from "iconsax-react";
+import "animate.css";
 
 const Note = ({ header, desc, date, id, handleDeleteNote, handleEditNote }) => {
     const onDeleteNote = () => {
@@ -16,7 +17,7 @@ const Note = ({ header, desc, date, id, handleDeleteNote, handleEditNote }) => {
     };
 
     return (
-        <div className='note-main'>
+        <div className='note-main animate__animated animate__fadeInRight'>
             <div className='note-header'>{header}</div>
             <div className='note-description'>{desc}</div>
             <div className='note-footer'>
