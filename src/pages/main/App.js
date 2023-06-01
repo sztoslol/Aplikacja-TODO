@@ -3,7 +3,7 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Dashboard from "../dashboard/dashboard.jsx";
 import Settings from "../settings/settings"; // Poprawna nazwa importu
-import SingIn from "../singIn/Singin";
+import SingIn from "../singIn/SingIn";
 import Register from "../register/register";
 import ProtectedRoutes from "../../ProtectedRoutes";
 import Cookies from "js-cookie";

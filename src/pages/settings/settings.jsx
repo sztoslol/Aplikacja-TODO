@@ -106,7 +106,7 @@ const Settings = ({ handleGoBack, userID }) => {
 
             <div className='settings-content'>
                 {users.slice(0, renderIndex).map((user, index) => (
-                    <div style={{ height: "500px" }} key={index}>
+                    <div  key={index}>
                         <UserCard
                             login={user.login}
                             role={user.role}

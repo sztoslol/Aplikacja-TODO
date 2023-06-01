@@ -1,4 +1,3 @@
-import { randomNormal } from "@tensorflow/tfjs";
 import "./addNoteForm.css";
 import { useRef, useState } from "react";
 
