@@ -2,7 +2,7 @@ import "./App.css";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Dashboard from "../dashboard/dashboard.jsx";
-import Settings from "../settings/settings"; // Poprawna nazwa importu
+import Settings from "../settings/settings";
 import SingIn from "../singIn/SingIn";
 import Register from "../register/register";
 import ProtectedRoutes from "../../ProtectedRoutes";

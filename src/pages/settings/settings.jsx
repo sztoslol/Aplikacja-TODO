@@ -106,11 +106,7 @@ const Settings = ({ handleGoBack, userID }) => {
 
             <div className='settings-content'>
                 {users.slice(0, renderIndex).map((user, index) => (
-<<<<<<< Updated upstream
                     <div  key={index}>
-=======
-                    <div key={index}>
->>>>>>> Stashed changes
                         <UserCard
                             login={user.login}
                             role={user.role}
