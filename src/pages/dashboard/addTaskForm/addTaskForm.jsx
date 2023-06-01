@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const AddTaskForm = ({ handleCloseForm, editData }) => {
+const AddTaskForm = ({ handleCloseForm, editData, helpFn }) => {
     const dotName = useRef(null);
     const dotDescription = useRef(null);
     const dotDate = useRef(null);
@@ -60,6 +60,7 @@ const AddTaskForm = ({ handleCloseForm, editData }) => {
                 if (!response.ok) {
                     throw new Error("Error adding task");
                 }
+                helpFn(response);
                 console.log("Task added successfully");
                 handleCloseForm();
             })
@@ -79,6 +80,7 @@ const AddTaskForm = ({ handleCloseForm, editData }) => {
             .then((response) => {
                 if (response.ok) {
                     console.log("Zadanie zostało zaktualizowane.");
+                    helpFn(response);
                     handleCloseForm();
                 } else if (response.status === 404) {
                     console.log("Nie znaleziono zadania o podanym ID.");

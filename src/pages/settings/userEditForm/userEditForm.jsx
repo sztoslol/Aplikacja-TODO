@@ -9,6 +9,9 @@ const UserEditForm = ({ userID, role, handleClose }) => {
     const errorLogin = useRef(null);
     const errorPassword = useRef(null);
 
+    const regex =
+        /^(((?=.*[a-z])(?=.*[A-Z]))|((?=.*[a-z])(?=.*[0-9]))|((?=.*[A-Z])(?=.*[0-9])))(?=.{6,})/;
+
     const [userData, setUserData] = useState({
         login: "",
         password: "",
@@ -116,6 +119,26 @@ const UserEditForm = ({ userID, role, handleClose }) => {
             dotPassword.current.style.display = "block";
             errorPassword.current.style.display = "block";
             errorPassword.current.textContent = "Uzupełnij to pole!";
+        } else {
+            dotPassword.current.style.display = "none";
+            errorPassword.current.style.display = "none";
+        }
+
+        if (userData.login.length <= 3) {
+            dotLogin.current.style.display = "block";
+            errorLogin.current.style.display = "block";
+            errorLogin.current.textContent = "Login jest za krótki!";
+            return;
+        } else {
+            errorLogin.current.style.display = "none";
+            dotLogin.current.style.display = "none";
+        }
+
+        if (!regex.test(userData.password)) {
+            dotPassword.current.style.display = "block";
+            errorPassword.current.style.display = "block";
+            errorPassword.current.textContent = "Nieprawidłowe hasło";
+            return;
         } else {
             dotPassword.current.style.display = "none";
             errorPassword.current.style.display = "none";

@@ -530,7 +530,7 @@ app.post("/notes", (req, res) => {
                 res.status(500).send("Error querying database");
             } else {
                 console.log(`New note added with ID: ${results.insertId}`);
-                res.status(200).send("Note added successfully");
+                res.status(200).send({ id: results.insertId });
             }
         }
     );

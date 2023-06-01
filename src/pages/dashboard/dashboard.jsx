@@ -24,6 +24,8 @@ const Dashboard = ({ onLogOut, userData, goToSettings }) => {
     const [deletedTaskId, setDeletedTaskId] = useState(null);
     const [editDataNote, setEditDataNote] = useState({});
     const [editDataTask, setEditDataTask] = useState({});
+    const [editNoteId, setEditNoteId] = useState(0);
+    const [editTaskId, setEditTaskId] = useState(0);
     const [notes, setNotes] = useState([]);
     const [tasks, setTasks] = useState([]);
 
@@ -41,7 +43,7 @@ const Dashboard = ({ onLogOut, userData, goToSettings }) => {
                 console.error(error);
                 setIsNotesLoading(false);
             });
-    }, [showAddNoteForm, deletedNoteId]);
+    }, [editNoteId, deletedNoteId]);
 
     useEffect(() => {
         setIsTasksLoading(true);
@@ -61,7 +63,7 @@ const Dashboard = ({ onLogOut, userData, goToSettings }) => {
                     console.error(error);
                     setIsTasksLoading(false);
                 });
-    }, [showAddTaskForm, selectedOption, deletedTaskId]);
+    }, [editTaskId, selectedOption, deletedTaskId]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -198,6 +200,14 @@ const Dashboard = ({ onLogOut, userData, goToSettings }) => {
         return date.toLocaleDateString("pl-PL", options);
     };
 
+    const helpNotes = (id) => {
+        setEditNoteId(id);
+    };
+
+    const helpTasks = (id) => {
+        setEditTaskId(id);
+    };
+
     return (
         <>
             <ToastContainer />
@@ -205,12 +215,14 @@ const Dashboard = ({ onLogOut, userData, goToSettings }) => {
                 <AddTaskForm
                     handleCloseForm={handleCloseForm}
                     editData={editDataTask}
+                    helpFn={helpTasks}
                 />
             )}
             {showAddNoteForm && (
                 <AddNoteForm
                     handleCloseForm={handleCloseForm}
                     editData={editDataNote}
+                    helpFn={helpNotes}
                 />
             )}
             <div className='dashboard-topbar'>

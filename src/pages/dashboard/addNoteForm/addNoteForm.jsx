@@ -1,7 +1,8 @@
+import { randomNormal } from "@tensorflow/tfjs";
 import "./addNoteForm.css";
 import { useRef, useState } from "react";
 
-const AddNoteForm = ({ handleCloseForm, editData }) => {
+const AddNoteForm = ({ handleCloseForm, editData, helpFn }) => {
     const dotName = useRef(null);
     const dotDescription = useRef(null);
 
@@ -60,6 +61,7 @@ const AddNoteForm = ({ handleCloseForm, editData }) => {
                             throw new Error("Network response was not ok");
                         }
                         console.log("Notatka dodana!");
+                        helpFn(response.id);
                         handleCloseForm();
                     })
                     .catch((error) => {
@@ -82,6 +84,7 @@ const AddNoteForm = ({ handleCloseForm, editData }) => {
                     .then((response) => {
                         if (response.ok) {
                             console.log("Notatka została zaktualizowana.");
+                            helpFn(response);
                             handleCloseForm();
                         } else if (response.status === 404) {
                             console.log("Nie znaleziono notatki o podanym ID.");
