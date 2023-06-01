@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Capriola&family=Comfortaa&family=Rubik:wght@500&display=swap");
 
 body {
-    overflow-x: hidden;
+    overflow: hidden;
     margin: 0;
     padding: 0;
 }
