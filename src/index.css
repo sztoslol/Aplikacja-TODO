@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Capriola&family=Comfortaa&family=Rubik:wght@500&display=swap");
 
 body {
-    overflow: hidden;
+    overflow-x: hidden;
     margin: 0;
     padding: 0;
 }
@@ -29,6 +29,7 @@ body {
     font-weight: 500;
     font-size: 14px;
     color: #ff0000;
+    display: none;
 }
 
 .dot {
@@ -38,4 +39,5 @@ body {
     background-color: red;
     margin-right: 1px;
     margin-left: 5px;
+    display: none;
 }

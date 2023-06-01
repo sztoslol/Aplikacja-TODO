@@ -11,7 +11,6 @@ const UserCard = ({
     handleClose,
 }) => {
     const onDelete = () => {
-        console.log("onDelete", id);
         handleDelete(id);
     };
 

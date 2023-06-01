@@ -31,8 +31,6 @@ const App = () => {
         }
     }, []);
 
-    console.log(token.token);
-
     useEffect(() => {
         if (token.token !== "") {
             fetch(`http://localhost:3010/session/:${token.token}`)

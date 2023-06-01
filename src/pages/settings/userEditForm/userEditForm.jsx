@@ -1,5 +1,6 @@
 import "./userEditForm.css";
 import { useState, useRef } from "react";
+import { toast } from "react-toastify";
 
 const UserEditForm = ({ userID, role, handleClose }) => {
     const dotLogin = useRef(null);
@@ -59,10 +60,18 @@ const UserEditForm = ({ userID, role, handleClose }) => {
                         "Błąd podczas aktualizacji użytkownika:",
                         response.status
                     );
+                    toast.error("Użytkownik już istnieje", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
                 }
             })
             .catch((error) => {
-                console.error("Błąd sieci", error);
+                if (error.message.includes("500")) {
+                    console.error("Błąd serwera");
+                    toast.error("Błąd serwera", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                }
             });
     };
 
@@ -78,12 +87,18 @@ const UserEditForm = ({ userID, role, handleClose }) => {
                 if (response.ok) {
                     console.log("User added successfully");
                     handleClose();
+                } else if (response.status === 409) {
+                    toast.error("Użytkownik już istnieje", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
                 } else {
-                    throw new Error("Error querying database");
+                    toast.error("Błąd serwera", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
                 }
             })
             .catch((error) => {
-                console.error("Error:", error);
+                console.error(error);
             });
     };
 

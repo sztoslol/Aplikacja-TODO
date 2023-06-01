@@ -479,15 +479,35 @@ app.post("/users", (req, res) => {
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     connection.query(
-        "INSERT INTO users (login, password, role) VALUES (?, ?, ?)",
-        [login, hashedPassword, role],
-        (err, results) => {
-            if (err) {
-                console.error("Error querying database:", err);
+        "SELECT * FROM users WHERE login = ?",
+        [login],
+        (selectErr, selectResults) => {
+            if (selectErr) {
+                console.error("Error querying database:", selectErr);
                 res.status(500).send("Error querying database");
             } else {
-                console.log(`New user added with ID: ${results.insertId}`);
-                res.status(200).send("User added successfully");
+                if (selectResults.length > 0) {
+                    res.status(409).send("User with this login already exists");
+                } else {
+                    connection.query(
+                        "INSERT INTO users (login, password, role) VALUES (?, ?, ?)",
+                        [login, hashedPassword, role],
+                        (insertErr, insertResults) => {
+                            if (insertErr) {
+                                console.error(
+                                    "Error querying database:",
+                                    insertErr
+                                );
+                                res.status(500).send("Error querying database");
+                            } else {
+                                console.log(
+                                    `New user added with ID: ${insertResults.insertId}`
+                                );
+                                res.status(200).send("User added successfully");
+                            }
+                        }
+                    );
+                }
             }
         }
     );
@@ -599,26 +619,51 @@ app.post("/tasks", (req, res) => {
 /**
  *  Edycja uzytkownika
  */
-
 app.put("/users/:id", (req, res) => {
     const userId = req.params.id;
     const { login, password, role } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     connection.query(
-        "UPDATE users SET login = ?, password = ?, role = ? WHERE id = ?",
-        [login, hashedPassword, role, userId],
-        (err, result) => {
-            if (err) {
-                console.error("Błąd podczas aktualizacji użytkownika:", err);
+        "SELECT * FROM users WHERE login = ?",
+        [login],
+        (selectErr, selectResults) => {
+            if (selectErr) {
+                console.error(
+                    "Błąd podczas zapytania do bazy danych:",
+                    selectErr
+                );
                 res.status(500).json({
-                    error: "Błąd podczas aktualizacji użytkownika",
+                    error: "Błąd podczas zapytania do bazy danych",
                 });
+                return;
+                ``;
+            }
+
+            if (selectResults.length > 0) {
+                res.status(409).send("Login is already used by another user");
                 return;
             }
 
-            console.log("Zaktualizowano użytkownika o id:", userId);
-            res.sendStatus(200);
+            connection.query(
+                "UPDATE users SET login = ?, password = ?, role = ? WHERE id = ?",
+                [login, hashedPassword, role, userId],
+                (updateErr, updateResult) => {
+                    if (updateErr) {
+                        console.error(
+                            "Błąd podczas aktualizacji użytkownika:",
+                            updateErr
+                        );
+                        res.status(500).json({
+                            error: "Błąd podczas aktualizacji użytkownika",
+                        });
+                        return;
+                    }
+
+                    console.log("Zaktualizowano użytkownika o id:", userId);
+                    res.sendStatus(200);
+                }
+            );
         }
     );
 });

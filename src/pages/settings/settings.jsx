@@ -3,6 +3,8 @@ import { Back } from "iconsax-react";
 import UserCard from "./userCard/userCard";
 import UserEditForm from "./userEditForm/userEditForm";
 import { useState, useEffect } from "react";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 
 const Settings = ({ handleGoBack, userID }) => {
     const [editedUserId, setEditedUserId] = useState(null);
@@ -69,8 +71,6 @@ const Settings = ({ handleGoBack, userID }) => {
         }
     };
 
-    console.log(showAddForm);
-
     useEffect(() => {
         document.addEventListener("keydown", handleEscKey);
 
@@ -81,7 +81,8 @@ const Settings = ({ handleGoBack, userID }) => {
 
     return (
         <>
-            {showAddForm && <UserEditForm />}
+            <ToastContainer />
+            {showAddForm && <UserEditForm handleClose={handleCloseAddForm} />}
 
             <div className='settings-topbar'>
                 <div className='settings-topbar-text'>Ustawienia</div>
@@ -105,7 +106,7 @@ const Settings = ({ handleGoBack, userID }) => {
 
             <div className='settings-content'>
                 {users.slice(0, renderIndex).map((user, index) => (
-                    <div key={index}>
+                    <div style={{ height: "500px" }} key={index}>
                         <UserCard
                             login={user.login}
                             role={user.role}
@@ -119,7 +120,7 @@ const Settings = ({ handleGoBack, userID }) => {
                             <UserEditForm
                                 userID={user.id}
                                 role={user.role}
-                                handleClose={handleCloseAddForm}
+                                handleClose={handleCloseEditForm}
                             />
                         )}
                     </div>
