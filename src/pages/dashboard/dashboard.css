@@ -10,7 +10,6 @@
 }
 
 .dashboard-main {
-    height: 100%;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -153,6 +152,7 @@
 
 /*==========================Content=======================*/
 .dashboard-content {
+    flex: 2;
     height: 863px;
     width: 1058px;
     margin-left: 97.5px;
@@ -199,6 +199,7 @@
 }
 
 .dashboard-right-content {
+    flex: 1;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
@@ -206,5 +207,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     height: 800px;
+    width: 539px;
     position: relative;
 }

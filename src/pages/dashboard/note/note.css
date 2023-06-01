@@ -1,9 +1,9 @@
 .note-main {
-    width: 539px;
+    max-width: 539px;
     height: fit-content;
     display: flex;
     flex-direction: column;
-    background-color: #0000000a;
+    background-color: #0000000c;
     box-sizing: border-box;
     border-radius: 6px;
     padding: 28px;

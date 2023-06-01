@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Czas generowania: 18 Maj 2023, 22:48
+-- Czas generowania: 01 Cze 2023, 15:08
 -- Wersja serwera: 10.4.27-MariaDB
 -- Wersja PHP: 8.2.0
 
@@ -39,21 +39,20 @@ CREATE TABLE `notes` (
 --
 
 INSERT INTO `notes` (`id`, `name`, `description`, `created_at`) VALUES
-(1, 'Przykładowa notatka', 'Opis przykładowej notatki, możesz tutaj zapisywać dowolny tekst, który będzie widniał po prawej stronie ekranu', '2023-05-16'),
-(10, 'Test', 'Test', '2023-05-16');
+(1, 'Przykładowa notatka', 'Opis przykładowej notatki można tu pisać cokolwiek.', '2023-05-28');
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `note_history`
+-- Struktura tabeli dla tabeli `sessions`
 --
 
-CREATE TABLE `note_history` (
+CREATE TABLE `sessions` (
   `id` int(11) NOT NULL,
-  `note_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `user_id` int(11) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `expiration` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `type` enum('short','long') NOT NULL DEFAULT 'short'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -76,26 +75,7 @@ CREATE TABLE `tasks` (
 --
 
 INSERT INTO `tasks` (`id`, `name`, `description`, `due_date`, `created_at`, `updated_at`) VALUES
-(1, 'Przykładowe zadanie 1', 'Opis przykładowego zadania 1, które polega na wykonaniu konkretnej czynności w określonym czasie.', '2023-05-17', '2023-05-13 22:45:57', '2023-05-18 08:32:01'),
-(6, 'Przykładowe zadanie 2', 'Opis przykładowego zadania 2, które polega na wykonaniu konkretnej czynności w określonym czasie.', '2023-07-11', '2023-05-13 22:48:56', '2023-05-16 09:30:18'),
-(10, 'Przykładowa nazwa zadania', 'Przykładowy opis zadania', '2023-05-19', '2023-05-17 13:35:08', '2023-05-17 13:35:08'),
-(11, 'Zadanie przypisane do użytkownika', 'Testowe zadanie przypisane do użytkownika 1', '2023-06-13', '2023-05-17 13:38:24', '2023-05-17 13:38:24');
-
--- --------------------------------------------------------
-
---
--- Struktura tabeli dla tabeli `task_history`
---
-
-CREATE TABLE `task_history` (
-  `id` int(11) NOT NULL,
-  `task_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `due_date` date NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(1, 'Przykładowa nazwa zadania', 'Opis przykładowego zadania, można tu pisać cokolwiek.', '2023-06-28', '2023-05-28 21:22:14', '2023-05-28 22:25:22');
 
 -- --------------------------------------------------------
 
@@ -115,9 +95,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `login`, `password`, `role`) VALUES
-(1, 'Master', '$2a$10$iWmZ6/MJrPwwMafFU0mvUu5NIdm4SXHJ78ra70qwqO5Wh31sul/da', 'admin'),
-(2, 'user', '$2a$10$7ItciXfBp/PpsWNGNvPJm.VrgAna7s1mH3ryahJLN1Bk7p8tbrF/W', 'user'),
-(9, 'user2', '$2a$10$C672.ZzlwU4AGOEV2qGS9eCuXchRWbusgqD7o39jaaTcIVRlr3S/6', 'user');
+(1, 'Master', '$2b$10$n3XK1dzXJgTaxKcuLd.yQ.bXv4yZNwy63IxaJ2Nl1Bn/LRzS.d566', 'admin');
 
 -- --------------------------------------------------------
 
@@ -136,11 +114,7 @@ CREATE TABLE `user_tasks` (
 --
 
 INSERT INTO `user_tasks` (`user_id`, `task_id`, `is_favorite`) VALUES
-(1, 1, 1),
-(1, 10, 1),
-(2, 6, 0),
-(2, 10, 0),
-(2, 11, 0);
+(1, 1, 0);
 
 --
 -- Indeksy dla zrzutów tabel
@@ -153,24 +127,17 @@ ALTER TABLE `notes`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indeksy dla tabeli `note_history`
+-- Indeksy dla tabeli `sessions`
 --
-ALTER TABLE `note_history`
+ALTER TABLE `sessions`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `note_id` (`note_id`);
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indeksy dla tabeli `tasks`
 --
 ALTER TABLE `tasks`
   ADD PRIMARY KEY (`id`);
-
---
--- Indeksy dla tabeli `task_history`
---
-ALTER TABLE `task_history`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `task_id` (`task_id`);
 
 --
 -- Indeksy dla tabeli `users`
@@ -193,47 +160,35 @@ ALTER TABLE `user_tasks`
 -- AUTO_INCREMENT dla tabeli `notes`
 --
 ALTER TABLE `notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
--- AUTO_INCREMENT dla tabeli `note_history`
+-- AUTO_INCREMENT dla tabeli `sessions`
 --
-ALTER TABLE `note_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE `sessions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=218;
 
 --
 -- AUTO_INCREMENT dla tabeli `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
-
---
--- AUTO_INCREMENT dla tabeli `task_history`
---
-ALTER TABLE `task_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT dla tabeli `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- Ograniczenia dla zrzutów tabel
 --
 
 --
--- Ograniczenia dla tabeli `note_history`
+-- Ograniczenia dla tabeli `sessions`
 --
-ALTER TABLE `note_history`
-  ADD CONSTRAINT `note_history_ibfk_1` FOREIGN KEY (`note_id`) REFERENCES `notes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Ograniczenia dla tabeli `task_history`
---
-ALTER TABLE `task_history`
-  ADD CONSTRAINT `task_history_ibfk_1` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `sessions`
+  ADD CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Ograniczenia dla tabeli `user_tasks`

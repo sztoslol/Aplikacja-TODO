@@ -1,0 +1,157 @@
+.userEditForm-main {
+    width: 541px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    z-index: 999;
+    padding: 35px;
+    box-sizing: border-box;
+}
+
+.userEditForm-header {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 47px;
+    color: #233140;
+    text-align: center;
+}
+
+.userEditForm-input-password,
+.userEditForm-input-login {
+    margin-top: 33px;
+}
+
+.userEditForm-input-password-text,
+.userEditForm-input-login-text {
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #233140;
+}
+
+.userEditForm-input-password-top,
+.userEditForm-input-login-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.userEditForm-input-password-input,
+.userEditForm-input-login-input {
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 6px;
+    width: 364px;
+    height: 64px;
+    border: none;
+    box-sizing: border-box;
+    padding-left: 17px;
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: rgba(0, 0, 0, 0.4);
+    margin-top: 3px;
+}
+
+.userEditForm-input-password-input:focus,
+.userEditForm-input-login-input:focus {
+    outline: none;
+}
+
+.userEditForm-input-radio {
+    width: 364px;
+    margin-top: 23px;
+}
+
+.userEditForm-button {
+    background: #2f82ff;
+    border-radius: 6px;
+    font-family: "Capriola";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    color: #ffffff;
+    width: 364px;
+    height: 64px;
+    border: none;
+    margin-top: 23px;
+}
+
+.userEditForm-button:hover {
+    cursor: pointer;
+}
+
+.userEditForm-button:focus {
+    outline: none;
+}
+
+/*==================================Radio============================*/
+.radio-input input {
+    display: none;
+}
+
+.radio-input {
+    --container_width: 364px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.04);
+    color: rgba(0, 0, 0, 0.4);
+    width: var(--container_width);
+    overflow: hidden;
+}
+
+.radio-input label {
+    width: 100%;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    font-family: "Rubik";
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.selection {
+    display: none;
+    position: absolute;
+    height: 100%;
+    width: calc(var(--container_width) / 2);
+    z-index: 0;
+    left: 0;
+    top: 0;
+    border-radius: 6px;
+    transition: 0.3s ease;
+}
+
+.radio-input label:has(input:checked) {
+    color: #fff;
+}
+
+.radio-input label:has(input:checked) ~ .selection {
+    background-color: rgb(11 117 223);
+    display: inline-block;
+}
+
+.radio-input label:nth-child(1):has(input:checked) ~ .selection {
+    transform: translateX(calc(var(--container_width) * 0 / 2));
+}
+
+.radio-input label:nth-child(2):has(input:checked) ~ .selection {
+    transform: translateX(calc(var(--container_width) * 1 / 2));
+}

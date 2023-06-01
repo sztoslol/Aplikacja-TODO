@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
-import bcrypt from "bcryptjs";
 import "./singin.css";
 import "animate.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 
 const SingIn = ({ onLogin, isLoggedIn }) => {
     const dotLogin = useRef(null);
@@ -48,82 +48,69 @@ const SingIn = ({ onLogin, isLoggedIn }) => {
         navigate("/register");
     };
 
-    const handleUserDataCheck = (data) => {
-        if (userData.login !== data.login) {
+    const handleLogIn = () => {
+        if (!userData.login) {
             dotLogin.current.style.display = "block";
             errorLogin.current.style.display = "block";
-            errorLogin.current.textContent = "Błędny login lub hasło";
-            console.log("1");
+            errorLogin.current.textContent = "Uzupełnij to pole!";
         } else {
             dotLogin.current.style.display = "none";
             errorLogin.current.style.display = "none";
+        }
 
-            bcrypt.compare(userData.password, data.password).then((match) => {
-                if (!match) {
-                    dotLogin.current.style.display = "block";
-                    errorLogin.current.style.display = "block";
-                    errorLogin.current.textContent = "Błędny login lub hasło";
+        if (!userData.password) {
+            dotPassword.current.style.display = "block";
+            errorPassword.current.style.display = "block";
+            errorPassword.current.textContent = "Uzupełnij to pole!";
+        } else {
+            dotPassword.current.style.display = "none";
+            errorPassword.current.style.display = "none";
+        }
+
+        fetch("http://localhost:3010/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userData),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                onLogin(data);
+            })
+            .catch((error) => {
+                console.error("Błąd pobierania danych użytkownika:", error);
+
+                if (error.message.includes("500")) {
+                    console.error("Błąd serwera");
+                    toast.error("Błąd serwera", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
+                } else if (
+                    error.message.includes("401") ||
+                    error.message.includes("404")
+                ) {
+                    console.error("Błędny login lub hasło");
+                    toast.error("Błędny login lub hasło", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
                 } else {
-                    dotLogin.current.style.display = "none";
-                    errorLogin.current.style.display = "none";
-
-                    if (userData.rememberMe) {
-                        Cookies.set("login", userData.login, { expires: 7 });
-                        Cookies.set("isLoggedIn", true, { expires: 7 });
-                    }
-
-                    onLogin();
+                    console.error("Nieznany błąd");
+                    toast.error("Nieznany błąd", {
+                        position: toast.POSITION.TOP_RIGHT,
+                    });
                 }
             });
-        }
-    };
-
-    const handleLogIn = () => {
-        if (!userData.login || !userData.password) {
-            if (!userData.login) {
-                dotLogin.current.style.display = "block";
-                errorLogin.current.style.display = "block";
-                errorLogin.current.textContent = "Uzupełnij to pole!";
-            } else {
-                dotLogin.current.style.display = "none";
-                errorLogin.current.style.display = "none";
-            }
-
-            if (!userData.password) {
-                dotPassword.current.style.display = "block";
-                errorPassword.current.style.display = "block";
-                errorPassword.current.textContent = "Uzupełnij to pole!";
-            } else {
-                dotPassword.current.style.display = "none";
-                errorPassword.current.style.display = "none";
-            }
-            return;
-        } else {
-            fetch(`http://localhost:3010/users/${userData.login}`)
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.exists) {
-                        handleUserDataCheck(data.user);
-                    }
-                    if (!data.exists) {
-                        console.log("Użytkownik nie istnieje");
-                        dotLogin.current.style.display = "block";
-                        errorLogin.current.style.display = "block";
-                        errorLogin.current.textContent =
-                            "Błędny login lub hasło";
-                    } else {
-                        dotLogin.current.style.display = "none";
-                        errorLogin.current.style.display = "none";
-                    }
-                })
-                .catch((error) => {
-                    console.error("Błąd pobierania danych użytkownika:", error);
-                });
-        }
     };
 
     return (
         <>
+            <ToastContainer />
             <div id='login-background'></div>
             <div id='login-main'>
                 <div id='login-emotes'>👋😁</div>

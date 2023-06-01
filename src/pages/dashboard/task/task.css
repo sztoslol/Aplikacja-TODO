@@ -3,7 +3,7 @@
     flex-direction: column;
     width: 515px;
     height: fit-content;
-    background-color: #0000000a;
+    background-color: #0000000c;
     box-sizing: border-box;
     padding: 28px;
     border-radius: 8px;
@@ -79,12 +79,12 @@
     display: flex;
     justify-content: space-between;
     align-self: flex-end;
-    width: 88px;
+    gap: 15px;
 }
 
 .edit-icon {
     font-size: 150%;
-    color: "#233140";
+    color: #233140;
 }
 
 .edit-icon:hover {

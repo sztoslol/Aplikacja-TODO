@@ -1,54 +1,28 @@
 import React from "react";
+import {
+    formatDate,
+    calculateDaysFromDate,
+    calculateDaysBetweenDates,
+    calculateElapsedDaysPercentage,
+} from "../../../utils/dateUtils.js";
 import { Calendar, ArchiveAdd, ArchiveTick, Trash, Edit2 } from "iconsax-react";
 import { useState } from "react";
 import "./task.css";
+import "animate.css";
 
 const Task = ({
+    index,
+    taskID,
     header,
     desc,
     dueDate,
     createdAt,
+    userRole,
     isFavorite,
-    taskID,
     handleChangeFavorite,
+    handleDeleteTask,
+    handleEditTask,
 }) => {
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const options = { day: "numeric", month: "long" };
-        return date.toLocaleDateString("pl-PL", options);
-    };
-
-    const calculateDaysFromDate = (fromDate) => {
-        const today = new Date();
-        const from = new Date(fromDate);
-        from.setHours(0, 0, 0, 0);
-
-        const timeDifference = today.getTime() - from.getTime();
-        const daysDifference = Math.floor(
-            timeDifference / (1000 * 60 * 60 * 24)
-        );
-
-        return daysDifference;
-    };
-
-    const calculateDaysBetweenDates = (startDate, endDate) => {
-        const startDateObj = new Date(startDate);
-        const endDateObj = new Date(endDate);
-        startDateObj.setHours(0, 0, 0, 0);
-        endDateObj.setHours(0, 0, 0, 0);
-
-        const timeDifference = endDateObj.getTime() - startDateObj.getTime();
-        const daysDifference = Math.floor(
-            timeDifference / (1000 * 60 * 60 * 24)
-        );
-        return daysDifference;
-    };
-
-    const calculateElapsedDaysPercentage = (elapsedDays, totalDays) => {
-        const percentage = (elapsedDays / totalDays) * 100;
-        return percentage.toFixed(2);
-    };
-
     const elapsedDays = calculateDaysFromDate(createdAt);
     const totalDays = calculateDaysBetweenDates(createdAt, dueDate);
     const progressPercentage = calculateElapsedDaysPercentage(
@@ -72,8 +46,28 @@ const Task = ({
         });
     };
 
+    const onDeleteTask = () => {
+        handleDeleteTask(taskID);
+    };
+
+    const onEditTask = () => {
+        handleEditTask({
+            id: taskID,
+            name: header,
+            description: desc,
+            due_date: dueDate,
+        });
+    };
+
     return (
-        <div className='task-main'>
+        <div
+            className={
+                "task-main animate__animated " +
+                (index % 2 === 1
+                    ? "animate__fadeInRight"
+                    : "animate__fadeInLeft")
+            }
+        >
             <div className='task-header'>{header}</div>
 
             <div className='task-description'>{desc}</div>
@@ -116,12 +110,24 @@ const Task = ({
                             />
                         )}
                     </div>
-                    <div className='task-footer-edit-element'>
-                        <Trash className='edit-icon' variant='Bold' />
-                    </div>
-                    <div className='task-footer-edit-element'>
-                        <Edit2 className='edit-icon' variant='Bold' />
-                    </div>
+                    {userRole === "admin" && (
+                        <>
+                            <div className='task-footer-edit-element'>
+                                <Trash
+                                    className='edit-icon'
+                                    variant='Bold'
+                                    onClick={() => onDeleteTask(taskID)}
+                                />
+                            </div>
+                            <div className='task-footer-edit-element'>
+                                <Edit2
+                                    className='edit-icon'
+                                    variant='Bold'
+                                    onClick={() => onEditTask()}
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
